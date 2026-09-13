@@ -6,122 +6,108 @@
 
 @if (_issue is null)
 {
-    <p class="muted">Loading…</p>
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
 }
 else
 {
     <h1>Issue @_issue.DocumentNumber</h1>
     <h2>
         @Lookups.WarehouseName(_issue.WarehouseId) · @JalaliUi.Format(_issue.DocumentDate) ·
-        <span class="badge @_issue.Status.ToLower()">@_issue.Status</span>
+        <RadzenBadge BadgeStyle="@(IsDraft ? BadgeStyle.Warning : (_issue.Status == "Posted" ? BadgeStyle.Success : BadgeStyle.Danger))"
+                     Text="@_issue.Status" />
     </h2>
 
     <p class="muted">@_issue.Description</p>
 
     @if (IsDraft)
     {
-        <div class="card">
-            <h2>Add line</h2>
-            <form @onsubmit="AddLineAsync">
-                <div class="row">
-                    <div class="field">
+        <RadzenCard>
+            <h2 style="margin:0 0 0.6rem">Add line</h2>
+            <RadzenTemplateForm TItem="AddIssueLineDto" Data="@_lineModel" Submit="@AddLineAsync">
+                <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+                    <RadzenFieldset Legend="Line">
                         <label>Goods *</label>
-                        <select @bind="_goodsId">
-                            <option value="">—</option>
-                            @foreach (var g in Lookups.Goods.Where(g => g.Enabled))
-                            {
-                                <option value="@g.Id">@g.Code — @g.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="field">
+                        <RadzenDropDown
+                            @bind-Value="@_lineModel.GoodsId"
+                            TValue="Guid"
+                            Data="@Lookups.Goods.Where(g => g.Enabled)"
+                            TextProperty="Code"
+                            ValueProperty="Id"
+                            Placeholder="—"
+                            Style="width:100%" />
                         <label>Unit</label>
-                        <select @bind="_unitId">
-                            <option value="">—</option>
-                            @foreach (var u in Lookups.Units)
-                            {
-                                <option value="@u.Id">@u.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="field">
+                        <RadzenDropDown
+                            @bind-Value="@_lineModel.UnitId"
+                            TValue="Guid"
+                            Data="@Lookups.Units"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            Placeholder="—"
+                            Style="width:100%" />
                         <label>Quantity *</label>
-                        <input type="number" step="0.0001" @bind="_qty" />
-                    </div>
-                    <div class="field">
+                        <RadzenNumeric @bind-Value="@_lineModel.Quantity" TValue="decimal" Style="width:100%" />
                         <label>Unit price</label>
-                        <input type="number" step="0.01" @bind="_price" />
-                    </div>
-                </div>
-                <button type="submit">Add line</button>
-                <span class="error">@_error</span>
-            </form>
-        </div>
+                        <RadzenNumeric @bind-Value="@_lineModel.UnitPrice" TValue="decimal" Format="N2" Style="width:100%" />
+                    </RadzenFieldset>
+                </RadzenStack>
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Add line" Style="margin-top:0.8rem" />
+                <span class="error" style="margin-left:0.8rem">@_error</span>
+            </RadzenTemplateForm>
+        </RadzenCard>
     }
 
-    <div class="card">
-        <h2>Lines</h2>
+    <RadzenCard>
+        <h2 style="margin:0 0 0.6rem">Lines</h2>
         @if (_issue.Lines.Count == 0)
         {
             <p class="muted">No lines yet.</p>
         }
         else
         {
-            <table class="grid">
-                <thead>
-                    <tr>
-                        <th>Goods</th>
-                        <th>Unit</th>
-                        <th class="num">Qty</th>
-                        <th class="num">Unit price</th>
-                        <th class="num">Amount</th>
-                        <th>Description</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var line in _issue.Lines)
-                    {
-                        var lineId = line.Id;
-                        <tr>
-                            <td>@Lookups.GoodsName(line.GoodsId)</td>
-                            <td>@Lookups.UnitName(line.UnitId)</td>
-                            <td class="num">@line.Quantity</td>
-                            <td class="num">@line.UnitPrice.ToString("N2")</td>
-                            <td class="num">@line.Amount.ToString("N2")</td>
-                            <td>@line.Description</td>
-                            <td>
-                                @if (IsDraft)
-                                {
-                                    <button class="danger" @onclick="() => RemoveLineAsync(lineId)">✕</button>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="4" class="num"><strong>Total</strong></td>
-                        <td class="num"><strong>@_issue.Lines.Sum(l => l.Amount).ToString("N2")</strong></td>
-                        <td colspan="2"></td>
-                    </tr>
-                </tfoot>
-            </table>
+            <RadzenDataGrid Data="@_issue.Lines" TValue="IssueLineDto" Style="width:100%">
+                <Columns>
+                    <RadzenDataGridColumn TItem="IssueLineDto" Title="Goods">
+                        <Template>
+                            @Lookups.GoodsName(context.GoodsId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="IssueLineDto" Title="Unit">
+                        <Template>
+                            @Lookups.UnitName(context.UnitId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="IssueLineDto" Property="Quantity" Title="Qty" />
+                    <RadzenDataGridColumn TItem="IssueLineDto" Property="UnitPrice" Title="Unit price" FormatString="{0:N2}" />
+                    <RadzenDataGridColumn TItem="IssueLineDto" Property="Amount" Title="Amount" FormatString="{0:N2}" />
+                    <RadzenDataGridColumn TItem="IssueLineDto" Property="Description" Title="Description" />
+                    <RadzenDataGridColumn TItem="IssueLineDto" Title="">
+                        <Template>
+                            @if (IsDraft)
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="✕" Click="@(() => RemoveLineAsync(context.Id))" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+                <FooterTemplate>
+                    <strong>Total: @_issue.Lines.Sum(l => l.Amount).ToString("N2")</strong>
+                </FooterTemplate>
+            </RadzenDataGrid>
         }
-    </div>
+    </RadzenCard>
 
-    <div>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.6rem" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap" Style="margin-top:1rem">
         @if (IsDraft)
         {
-            <button @onclick="PostAsync" disabled="@(_issue.Lines.Count == 0)">Post to stock</button>
+            <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Post to stock" Click="@PostAsync" Disabled="@(_issue.Lines.Count == 0)" />
         }
         @if (_issue.Status == "Posted")
         {
-            <button class="danger" @onclick="CancelAsync">Cancel issue</button>
+            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Cancel issue" Click="@CancelAsync" />
         }
-        <a class="btn secondary" href="issues">Back to list</a>
+        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Back to list" Click="@(() => Navigation.NavigateTo("issues"))" />
         <span class="error">@_error</span>
-    </div>
+    </RadzenStack>
 }
 
 @code {
@@ -129,10 +115,7 @@ else
     public Guid Id { get; set; }
 
     private IssueDto? _issue;
-    private string _goodsId = "";
-    private string _unitId = "";
-    private decimal _qty;
-    private decimal _price;
+    private AddIssueLineDto _lineModel = new();
     private string? _error;
 
     private bool IsDraft => _issue?.Status == "Draft";
@@ -150,15 +133,8 @@ else
         _error = null;
         try
         {
-            await IssueService.AddLineAsync(Id, new AddIssueLineDto
-            {
-                GoodsId = Guid.Parse(_goodsId),
-                UnitId = Guid.Parse(_unitId),
-                Quantity = _qty,
-                UnitPrice = _price,
-            });
-            _qty = 0;
-            _price = 0;
+            await IssueService.AddLineAsync(Id, _lineModel);
+            _lineModel = new AddIssueLineDto();
             await LoadAsync();
         }
         catch (Exception ex)

@@ -5,62 +5,42 @@
 <h1>Warehouses</h1>
 <h2>Legacy: Anbar</h2>
 
-<div class="card">
-    <h2>Add warehouse</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">Add warehouse</h2>
+    <RadzenTemplateForm TItem="CreateWarehouseDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Identification">
                 <label>Code *</label>
-                <input @bind="_code" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Code" TValue="string" Style="width:100%" />
                 <label>Name *</label>
-                <input @bind="_name" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+            <RadzenFieldset Legend="Contact">
                 <label>Telephone</label>
-                <input @bind="_telephone" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Telephone" TValue="string" Style="width:100%" />
                 <label>Address</label>
-                <input @bind="_address" />
-            </div>
-        </div>
-        <button type="submit">Add</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenTextBox @bind-Value="@_model.Address" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Add" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
-    <table class="grid">
-        <thead>
-            <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Telephone</th>
-                <th>Address</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var w in _warehouses)
-            {
-                <tr>
-                    <td>@w.Code</td>
-                    <td>@w.Name</td>
-                    <td>@w.Telephone</td>
-                    <td>@w.Address</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+<RadzenCard>
+    <RadzenDataGrid Data="@_warehouses" TValue="Warehouse" Style="width:100%">
+        <Columns>
+            <RadzenDataGridColumn TItem="Warehouse" Property="Code" Title="Code" />
+            <RadzenDataGridColumn TItem="Warehouse" Property="Name" Title="Name" />
+            <RadzenDataGridColumn TItem="Warehouse" Property="Telephone" Title="Telephone" />
+            <RadzenDataGridColumn TItem="Warehouse" Property="Address" Title="Address" />
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
 
 @code {
     private List<Warehouse> _warehouses = [];
-    private string _code = "";
-    private string _name = "";
-    private string? _telephone;
-    private string? _address;
+    private CreateWarehouseDto _model = new();
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -76,15 +56,8 @@
         _error = null;
         try
         {
-            await WarehouseService.CreateAsync(new CreateWarehouseDto
-            {
-                Code = _code,
-                Name = _name,
-                Telephone = _telephone,
-                Address = _address,
-            });
-            _code = _name = "";
-            _telephone = _address = null;
+            await WarehouseService.CreateAsync(_model);
+            _model = new CreateWarehouseDto();
             await Lookups.RefreshAsync();
             await LoadAsync();
         }

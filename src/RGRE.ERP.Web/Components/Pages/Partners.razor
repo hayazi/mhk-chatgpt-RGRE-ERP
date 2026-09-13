@@ -5,85 +5,65 @@
 <h1>Partners</h1>
 <h2>Customers & suppliers (legacy: Account / Customer / Corporations)</h2>
 
-<div class="card">
-    <h2>Add partner</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">Add partner</h2>
+    <RadzenTemplateForm TItem="CreatePartnerDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Identification">
                 <label>Code *</label>
-                <input @bind="_code" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Code" TValue="string" Style="width:100%" />
                 <label>Name *</label>
-                <input @bind="_name" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+            <RadzenFieldset Legend="Kind &amp; contact">
                 <label>Kind</label>
-                <select @bind="_kind">
-                    <option>Customer</option>
-                    <option>Supplier</option>
-                    <option>Customer,Supplier</option>
-                </select>
-            </div>
-            <div class="field">
+                <RadzenDropDown
+                    @bind-Value="@_model.Kind"
+                    TValue="string"
+                    Data="@(new[] { "Customer", "Supplier", "Customer,Supplier" })"
+                    Style="width:100%" />
                 <label>Telephone</label>
-                <input @bind="_telephone" />
-            </div>
-        </div>
-        <button type="submit">Add</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenTextBox @bind-Value="@_model.Telephone" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Add" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
-    <table class="grid">
-        <thead>
-            <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Kind</th>
-                <th>Telephone</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in _partners)
-            {
-                var id = p.Id;
-                var blocked = p.IsBlocked;
-                <tr>
-                    <td>@p.Code</td>
-                    <td>@p.Name</td>
-                    <td>@p.Kind</td>
-                    <td>@p.Telephone</td>
-                    <td>
-                        @if (p.IsBlocked)
-                        {
-                            <span class="badge cancelled">Blocked</span>
-                        }
-                        else
-                        {
-                            <span class="badge posted">Active</span>
-                        }
-                    </td>
-                    <td>
-                        <button class="secondary" @onclick="() => ToggleAsync(id, blocked)">
-                            @(blocked ? "Unblock" : "Block")
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+<RadzenCard>
+    <RadzenDataGrid Data="@_partners" TValue="PartnerDto" Style="width:100%">
+        <Columns>
+            <RadzenDataGridColumn TItem="PartnerDto" Property="Code" Title="Code" />
+            <RadzenDataGridColumn TItem="PartnerDto" Property="Name" Title="Name" />
+            <RadzenDataGridColumn TItem="PartnerDto" Property="Kind" Title="Kind" />
+            <RadzenDataGridColumn TItem="PartnerDto" Property="Telephone" Title="Telephone" />
+            <RadzenDataGridColumn TItem="PartnerDto" Title="Status">
+                <Template>
+                    @if (context.IsBlocked)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Blocked" />
+                    }
+                    else
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Active" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="PartnerDto" Title="">
+                <Template>
+                    <RadzenButton ButtonStyle="ButtonStyle.Light"
+                                  Text="@(context.IsBlocked ? "Unblock" : "Block")"
+                                  Click="@(() => ToggleAsync(context.Id, context.IsBlocked))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
 
 @code {
     private List<PartnerDto> _partners = [];
-    private string _code = "";
-    private string _name = "";
-    private string _kind = "Customer";
-    private string? _telephone;
+    private CreatePartnerDto _model = new();
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -99,21 +79,14 @@
         _error = null;
         try
         {
-            await PartnerService.CreateAsync(new CreatePartnerDto
-            {
-                Code = _code,
-                Name = _name,
-                Kind = _kind,
-                Telephone = _telephone,
-            });
-            _code = _name = "";
-            _telephone = null;
+            await PartnerService.CreateAsync(_model);
+            _model = new CreatePartnerDto();
             await Lookups.RefreshAsync();
             await LoadAsync();
         }
-        catch (Exception currentEx)
+        catch (Exception ex)
         {
-            _error = currentEx.Message;
+            _error = ex.Message;
         }
     }
 

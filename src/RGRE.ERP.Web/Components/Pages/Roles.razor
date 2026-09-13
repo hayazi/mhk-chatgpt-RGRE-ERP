@@ -7,82 +7,63 @@
 <h1>Roles</h1>
 <h2>Permission bundles (legacy: Permissions matrix)</h2>
 
-<div class="card">
-    <h2>New role</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New role</h2>
+    <RadzenTemplateForm TItem="CreateRoleDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Role">
                 <label>Name *</label>
-                <input @bind="_name" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
                 <label>Description</label>
-                <input @bind="_description" />
-            </div>
-        </div>
-        <div class="field">
-            <label>Permissions</label>
-            <div class="perm-grid">
-                @foreach (var p in AppPermissions.All)
-                {
-                    <label class="perm">
-                        <input type="checkbox" checked="@_selectedPermissions.Contains(p)" @onchange='e => TogglePermission(p, e.Value is true)' />
-                        @p
-                    </label>
-                }
-            </div>
-        </div>
-        <button type="submit">Create role</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenTextBox @bind-Value="@_model.Description" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+            <RadzenFieldset Legend="Permissions">
+                <RadzenCheckBoxList
+                    Value="@_model.Permissions"
+                    TValue="string"
+                    Data="@AppPermissions.All"
+                    Style="width:100%"
+                    Change="@OnPermissionsChanged" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create role" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_roles.Count == 0)
     {
         <p class="muted">No roles yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Permissions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var r in _roles)
-                {
-                    <tr>
-                        <td>@r.Name</td>
-                        <td>@r.Description</td>
-                        <td>@string.Join(", ", r.Permissions)</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <RadzenDataGrid Data="@_roles" TValue="RoleDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="RoleDto" Property="Name" Title="Name" />
+                <RadzenDataGridColumn TItem="RoleDto" Property="Description" Title="Description" />
+                <RadzenDataGridColumn TItem="RoleDto" Title="Permissions">
+                    <Template>
+                        @string.Join(", ", context.Permissions)
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<RoleDto> _roles = [];
-    private List<string> _selectedPermissions = [];
-    private string _name = "";
-    private string? _description;
+    private CreateRoleDto _model = new();
     private string? _error;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync() => _roles = [.. await RoleService.ListAsync()];
 
-    private void TogglePermission(string permission, bool selected)
+    private void OnPermissionsChanged(IEnumerable<string> selected)
     {
-        if (selected && !_selectedPermissions.Contains(permission))
-            _selectedPermissions.Add(permission);
-        else if (!selected)
-            _selectedPermissions.Remove(permission);
+        _model.Permissions = selected is null ? [] : selected.ToList();
     }
 
     private async Task CreateAsync()
@@ -90,16 +71,8 @@
         _error = null;
         try
         {
-            await RoleService.CreateAsync(new CreateRoleDto
-            {
-                Name = _name,
-                Description = _description,
-                Permissions = _selectedPermissions,
-            });
-
-            _name = "";
-            _description = null;
-            _selectedPermissions = [];
+            await RoleService.CreateAsync(_model);
+            _model = new CreateRoleDto();
             await LoadAsync();
         }
         catch (Exception ex)

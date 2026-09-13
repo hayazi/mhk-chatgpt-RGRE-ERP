@@ -1,5 +1,6 @@
 @page "/fiscal-years"
 @using RGRE.ERP.Application.Platform
+@using RGRE.ERP.Domain.Common
 @rendermode InteractiveServer
 @inject IOrganizationService OrganizationService
 @inject IFiscalYearService FiscalYearService
@@ -7,96 +8,83 @@
 <h1>Fiscal Years</h1>
 <h2>Accounting periods (legacy: FYear) — posting is blocked into closed years</h2>
 
-<div class="card">
-    <h2>New fiscal year</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New fiscal year</h2>
+    <RadzenTemplateForm TItem="CreateFiscalYearDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Period">
                 <label>Company *</label>
-                <select @bind="_companyId">
-                    <option value="">—</option>
-                    @foreach (var c in _companies)
-                    {
-                        <option value="@c.Id">@c.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="field">
+                <RadzenDropDown
+                    @bind-Value="@_model.CompanyId"
+                    TValue="Guid"
+                    Data="@_companies"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Placeholder="—"
+                    Style="width:100%" />
                 <label>Name *</label>
-                <input @bind="_name" placeholder="سال مالی ۱۴۰۵" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
                 <label>Start (Jalali, e.g. 1405/01/01) *</label>
-                <input @bind="_startJalali" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_startJalali" TValue="string" Style="width:100%" />
                 <label>End (Jalali, e.g. 1405/12/29) *</label>
-                <input @bind="_endJalali" />
-            </div>
-        </div>
-        <button type="submit">Create fiscal year</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenTextBox @bind-Value="@_endJalali" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create fiscal year" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_fiscalYears.Count == 0)
     {
         <p class="muted">No fiscal years yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Company</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var fy in _fiscalYears)
-                {
-                    <tr>
-                        <td>@fy.Name</td>
-                        <td>@CompanyName(fy.CompanyId)</td>
-                        <td>@fy.StartDateJalali</td>
-                        <td>@fy.EndDateJalali</td>
-                        <td>
-                            @if (fy.IsClosed)
-                            {
-                                <span class="badge cancelled">Closed</span>
-                            }
-                            else
-                            {
-                                <span class="badge posted">Open</span>
-                            }
-                        </td>
-                        <td>
-                            @if (fy.IsClosed)
-                            {
-                                <button class="secondary" @onclick='() => ReopenAsync(fy)'>Reopen</button>
-                            }
-                            else
-                            {
-                                <button class="danger" @onclick='() => CloseAsync(fy)'>Close</button>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <RadzenDataGrid Data="@_fiscalYears" TValue="FiscalYearDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="FiscalYearDto" Property="Name" Title="Name" />
+                <RadzenDataGridColumn TItem="FiscalYearDto" Title="Company">
+                    <Template>
+                        @CompanyName(context.CompanyId)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="FiscalYearDto" Property="StartDateJalali" Title="Start" />
+                <RadzenDataGridColumn TItem="FiscalYearDto" Property="EndDateJalali" Title="End" />
+                <RadzenDataGridColumn TItem="FiscalYearDto" Title="Status">
+                    <Template>
+                        @if (context.IsClosed)
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Closed" />
+                        }
+                        else
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Open" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="FiscalYearDto" Title="">
+                    <Template>
+                        @if (context.IsClosed)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Reopen" Click="@(() => ReopenAsync(context))" />
+                        }
+                        else
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Close" Click="@(() => CloseAsync(context))" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<CompanyDto> _companies = [];
     private List<FiscalYearDto> _fiscalYears = [];
-    private string _companyId = "";
-    private string _name = "";
+    private CreateFiscalYearDto _model = new();
     private string _startJalali = "";
     private string _endJalali = "";
     private string? _error;
@@ -117,21 +105,19 @@
         _error = null;
         try
         {
-            if (!RGRE.ERP.Domain.Common.JalaliDate.TryParse(_startJalali, out var start))
+            if (!JalaliDate.TryParse(_startJalali, out var start))
                 throw new ArgumentException($"Invalid Jalali start date '{_startJalali}'.");
 
-            if (!RGRE.ERP.Domain.Common.JalaliDate.TryParse(_endJalali, out var end))
+            if (!JalaliDate.TryParse(_endJalali, out var end))
                 throw new ArgumentException($"Invalid Jalali end date '{_endJalali}'.");
 
-            await FiscalYearService.CreateAsync(new CreateFiscalYearDto
-            {
-                CompanyId = Guid.Parse(_companyId),
-                Name = _name,
-                StartDate = start,
-                EndDate = end,
-            });
+            _model.StartDate = start;
+            _model.EndDate = end;
 
-            _companyId = _name = _startJalali = _endJalali = "";
+            await FiscalYearService.CreateAsync(_model);
+
+            _model = new CreateFiscalYearDto();
+            _startJalali = _endJalali = "";
             await LoadAsync();
         }
         catch (Exception ex)

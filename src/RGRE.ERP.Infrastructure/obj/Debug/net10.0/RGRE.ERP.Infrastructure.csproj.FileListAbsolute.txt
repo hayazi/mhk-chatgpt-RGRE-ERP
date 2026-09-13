@@ -15,3 +15,4 @@ F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.I
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\refint\RGRE.ERP.Infrastructure.dll
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.pdb
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\ref\RGRE.ERP.Infrastructure.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.sourcelink.json

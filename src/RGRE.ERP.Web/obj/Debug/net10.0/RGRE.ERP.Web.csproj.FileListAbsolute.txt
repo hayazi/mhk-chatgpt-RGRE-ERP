@@ -180,7 +180,6 @@ F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\r9w1mufl9l
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\i1901ftr2x-{0}-cjvtifvnlk-cjvtifvnlk.gz
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\6xb9o06z95-{0}-bqb0cdp902-bqb0cdp902.gz
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\t2tvocn0z4-{0}-b9npfpceck-b9npfpceck.gz
-F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\65yaitagga-{0}-40ae66li7g-40ae66li7g.gz
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\vm1h7y576b-{0}-9hsif5t8mt-9hsif5t8mt.gz
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\9jl4u6y05w-{0}-dwu72t6gfx-dwu72t6gfx.gz
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\staticwebassets.build.json
@@ -194,3 +193,5 @@ F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\refint\RGRE.ERP.Web.d
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.pdb
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.genruntimeconfig.cache
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\ref\RGRE.ERP.Web.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.sourcelink.json
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\compressed\65yaitagga-{0}-kuf6f8gxce-kuf6f8gxce.gz

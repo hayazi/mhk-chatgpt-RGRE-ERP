@@ -6,73 +6,66 @@
 <h1>Companies</h1>
 <h2>Legal companies (legacy: Corporations)</h2>
 
-<div class="card">
-    <h2>New company</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New company</h2>
+    <RadzenTemplateForm TItem="CreateCompanyDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Identification">
                 <label>Code *</label>
-                <input @bind="_code" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Code" TValue="string" Style="width:100%" />
                 <label>Name *</label>
-                <input @bind="_name" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
                 <label>Economic code</label>
-                <input @bind="_economicCode" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.EconomicCode" TValue="string" Style="width:100%" />
                 <label>National id</label>
-                <input @bind="_nationalId" />
-            </div>
-        </div>
-        <button type="submit">Create company</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenTextBox @bind-Value="@_model.NationalId" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create company" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_companies.Count == 0)
     {
         <p class="muted">No companies yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Economic code</th>
-                    <th>National id</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var c in _companies)
-                {
-                    <tr>
-                        <td>@c.Code</td>
-                        <td>@c.Name</td>
-                        <td>@c.EconomicCode</td>
-                        <td>@c.NationalId</td>
-                        <td>
-                            <span class="badge @(c.Enabled ? "posted" : "cancelled")">@(c.Enabled ? "Active" : "Disabled")</span>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <RadzenDataGrid Data="@_companies" TValue="CompanyDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="CompanyDto" Property="Code" Title="Code" />
+                <RadzenDataGridColumn TItem="CompanyDto" Property="Name" Title="Name" />
+                <RadzenDataGridColumn TItem="CompanyDto" Property="EconomicCode" Title="Economic code" />
+                <RadzenDataGridColumn TItem="CompanyDto" Property="NationalId" Title="National id" />
+                <RadzenDataGridColumn TItem="CompanyDto" Title="Status">
+                    <Template>
+                        @if (context.Enabled)
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Active" />
+                        }
+                        else
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Disabled" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="CompanyDto" Title="">
+                    <Template>
+                        <RadzenButton ButtonStyle="ButtonStyle.Light"
+                                      Text="@(context.Enabled ? "Disable" : "Enable")"
+                                      Click="@(() => ToggleAsync(context.Id, context.Enabled))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<CompanyDto> _companies = [];
-    private string _code = "";
-    private string _name = "";
-    private string? _economicCode;
-    private string? _nationalId;
+    private CreateCompanyDto _model = new();
     private string? _error;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
@@ -84,16 +77,22 @@
         _error = null;
         try
         {
-            await OrganizationService.CreateCompanyAsync(new CreateCompanyDto
-            {
-                Code = _code,
-                Name = _name,
-                EconomicCode = _economicCode,
-                NationalId = _nationalId,
-            });
+            await OrganizationService.CreateCompanyAsync(_model);
+            _model = new CreateCompanyDto();
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
 
-            _code = _name = "";
-            _economicCode = _nationalId = null;
+    private async Task ToggleAsync(Guid id, bool enabled)
+    {
+        _error = null;
+        try
+        {
+            await OrganizationService.SetCompanyEnabledAsync(id, !enabled);
             await LoadAsync();
         }
         catch (Exception ex)

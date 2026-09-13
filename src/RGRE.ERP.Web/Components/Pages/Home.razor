@@ -11,85 +11,83 @@
 
 @if (!Lookups.Loaded)
 {
-    <p class="muted">Loading…</p>
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
 }
 else
 {
-    <div class="kpis">
-        <div class="kpi">
-            <div class="kpi-label">Goods</div>
-            <div class="kpi-value">@Lookups.Goods.Count</div>
-        </div>
-        <div class="kpi">
-            <div class="kpi-label">Warehouses</div>
-            <div class="kpi-value">@Lookups.Warehouses.Count</div>
-        </div>
-        <div class="kpi">
-            <div class="kpi-label">Partners</div>
-            <div class="kpi-value">@Lookups.Partners.Count</div>
-        </div>
-        <div class="kpi">
-            <div class="kpi-label">Ledger accounts</div>
-            <div class="kpi-value">@Lookups.Accounts.Count</div>
-        </div>
-    </div>
+    <RadzenStack Gap="1rem" Orientation="Orientation.Vertical">
+        <RadzenCard>
+            <RadzenStack Gap="0.6rem">
+                <RadzenHeading HeadingStyle="HeadingStyle.H3" Text="Key figures" />
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Wrap="FlexWrap.Wrap">
+                    <RadzenCard Variant="Variant.Outlined" Style="flex:1; min-width:160px">
+                        <RadzenText Text="Goods" TextStyle="TextStyle.Caption" />
+                        <RadzenText Text="@Lookups.Goods.Count.ToString()" TextStyle="TextStyle.H3" />
+                    </RadzenCard>
+                    <RadzenCard Variant="Variant.Outlined" Style="flex:1; min-width:160px">
+                        <RadzenText Text="Warehouses" TextStyle="TextStyle.Caption" />
+                        <RadzenText Text="@Lookups.Warehouses.Count.ToString()" TextStyle="TextStyle.H3" />
+                    </RadzenCard>
+                    <RadzenCard Variant="Variant.Outlined" Style="flex:1; min-width:160px">
+                        <RadzenText Text="Partners" TextStyle="TextStyle.Caption" />
+                        <RadzenText Text="@Lookups.Partners.Count.ToString()" TextStyle="TextStyle.H3" />
+                    </RadzenCard>
+                    <RadzenCard Variant="Variant.Outlined" Style="flex:1; min-width:160px">
+                        <RadzenText Text="Ledger accounts" TextStyle="TextStyle.Caption" />
+                        <RadzenText Text="@Lookups.Accounts.Count.ToString()" TextStyle="TextStyle.H3" />
+                    </RadzenCard>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenCard>
 
-    <div class="card">
-        <h2>Stock value by warehouse</h2>
-        @if (_stockByWarehouse.Count == 0)
-        {
-            <p class="muted">No stock movements yet.</p>
-        }
-        else
-        {
-            <table class="grid">
-                <thead>
-                    <tr>
-                        <th>Warehouse</th>
-                        <th class="num">Items</th>
-                        <th class="num">Quantity</th>
-                        <th class="num">Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var (warehouseId, items, qty, value) in _stockByWarehouse)
-                    {
-                        <tr>
-                            <td>@Lookups.WarehouseName(warehouseId)</td>
-                            <td class="num">@items</td>
-                            <td class="num">@qty.ToString("N2")</td>
-                            <td class="num">@value.ToString("N2")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-    </div>
-
-    <div class="card">
-        <h2>Recent documents</h2>
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Number</th>
-                    <th>Warehouse</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var doc in _recentDocs.Take(8))
+        <RadzenCard>
+            <RadzenStack Gap="0.6rem">
+                <RadzenHeading HeadingStyle="HeadingStyle.H3" Text="Stock value by warehouse" />
+                @if (_stockByWarehouse.Count == 0)
                 {
-                    <tr>
-                        <td>@doc.Type</td>
-                        <td>@doc.Number</td>
-                        <td>@doc.Warehouse</td>
-                        <td><span class="badge @doc.Status.ToLower()">@doc.Status</span></td>
-                    </tr>
+                    <p class="muted">No stock movements yet.</p>
                 }
-            </tbody>
-        </table>
-    </div>
+                else
+                {
+                    <RadzenDataGrid Data="@_stockByWarehouse" TValue="(Guid WarehouseId, int Items, decimal Qty, decimal Value)" Style="width:100%">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="(Guid WarehouseId, int Items, decimal Qty, decimal Value)" Title="Warehouse">
+                                <Template>
+                                    @Lookups.WarehouseName(context.WarehouseId)
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="(Guid WarehouseId, int Items, decimal Qty, decimal Value)" Property="Items" Title="Items" />
+                            <RadzenDataGridColumn TItem="(Guid WarehouseId, int Items, decimal Qty, decimal Value)" Property="Qty" Title="Quantity" FormatString="{0:N2}" />
+                            <RadzenDataGridColumn TItem="(Guid WarehouseId, int Items, decimal Qty, decimal Value)" Property="Value" Title="Value" FormatString="{0:N2}">
+                                <FooterTemplate>
+                                    <strong>@_stockByWarehouse.Sum(x => x.Value).ToString("N2")</strong>
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                }
+            </RadzenStack>
+        </RadzenCard>
+
+        <RadzenCard>
+            <RadzenStack Gap="0.6rem">
+                <RadzenHeading HeadingStyle="HeadingStyle.H3" Text="Recent documents" />
+                <RadzenDataGrid Data="@_recentDocs" TValue="(string Type, string Number, string Warehouse, string Status)" Style="width:100%">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="(string Type, string Number, string Warehouse, string Status)" Property="Type" Title="Type" />
+                        <RadzenDataGridColumn TItem="(string Type, string Number, string Warehouse, string Status)" Property="Number" Title="Number" />
+                        <RadzenDataGridColumn TItem="(string Type, string Number, string Warehouse, string Status)" Property="Warehouse" Title="Warehouse" />
+                        <RadzenDataGridColumn TItem="(string Type, string Number, string Warehouse, string Status)" Title="Status">
+                            <Template>
+                                <RadzenBadge BadgeStyle="@(context.Status == "Draft" ? BadgeStyle.Warning : (context.Status == "Posted" ? BadgeStyle.Success : BadgeStyle.Danger))"
+                                             Text="@context.Status" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
 }
 
 @code {

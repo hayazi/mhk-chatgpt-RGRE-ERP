@@ -5,91 +5,99 @@
 @inject IFiscalYearService FiscalYearService
 @inject NavigationManager Navigation
 
-<div class="app">
-    <aside class="sidebar">
-        <div class="brand">
-            <span class="brand-mark">RG</span>
-            <span class="brand-name">RGRE-ERP</span>
-        </div>
-
-        @if (UserContext.IsAuthenticated)
-        {
-            <div class="context-bar">
-                <div class="context-user" title="@UserContext.UserName">@(UserContext.DisplayName ?? UserContext.UserName)</div>
-                <form method="post" action="/account/switch-context">
-                    <select name="CompanyId">
-                        <option value="">Company…</option>
-                        @foreach (var c in _companies)
-                        {
-                            <option value="@c.Id" selected="@(c.Id == UserContext.CompanyId)">@c.Name</option>
-                        }
-                    </select>
-                    <select name="BranchId">
-                        <option value="">Branch…</option>
-                        @foreach (var b in _branches.Where(b => !UserContext.CompanyId.HasValue || b.CompanyId == UserContext.CompanyId))
-                        {
-                            <option value="@b.Id" selected="@(b.Id == UserContext.BranchId)">@b.Name</option>
-                        }
-                    </select>
-                    <select name="FiscalYearId">
-                        <option value="">Fiscal year…</option>
-                        @foreach (var f in _fiscalYears.Where(f => !f.IsClosed))
-                        {
-                            <option value="@f.Id" selected="@(f.Id == UserContext.FiscalYearId)">@f.Name</option>
-                        }
-                    </select>
-                    <button type="submit" class="secondary context-apply">Apply</button>
-                </form>
+<RadzenLayout>
+    <RadzenSidebar>
+        <RadzenStack Gap="0" Style="height:100%">
+            <div class="brand" style="padding:1rem; border-bottom:1px solid var(--rz-navitem-background)">
+                <span class="brand-mark" style="display:inline-grid; place-items:center; width:32px; height:32px; border-radius:8px; background:var(--rz-primary); color:#fff; font-weight:700">RG</span>
+                <span class="brand-name" style="font-weight:700; letter-spacing:0.03em; margin-left:0.6rem">RGRE-ERP</span>
             </div>
-        }
 
-        <nav>
-            <NavLink class="nav-item" href="/" Match="NavLinkMatch.All">
-                <span class="ico">⌂</span> Dashboard
-            </NavLink>
-
-            <div class="nav-group">Inventory</div>
-            <NavLink class="nav-item" href="goods"><span class="ico">▦</span> Goods</NavLink>
-            <NavLink class="nav-item" href="warehouses"><span class="ico">⌸</span> Warehouses</NavLink>
-            <NavLink class="nav-item" href="units"><span class="ico">≡</span> Units</NavLink>
-            <NavLink class="nav-item" href="receipts"><span class="ico">↘</span> Receipts</NavLink>
-            <NavLink class="nav-item" href="issues"><span class="ico">↗</span> Issues</NavLink>
-            <NavLink class="nav-item" href="transfers"><span class="ico">⇄</span> Transfers</NavLink>
-            <NavLink class="nav-item" href="stock"><span class="ico">≣</span> Stock</NavLink>
-
-            <div class="nav-group">Accounting</div>
-            <NavLink class="nav-item" href="accounts"><span class="ico">⌗</span> Chart of Accounts</NavLink>
-            <NavLink class="nav-item" href="vouchers"><span class="ico">▤</span> Vouchers</NavLink>
-
-            <div class="nav-group">Partners</div>
-            <NavLink class="nav-item" href="partners"><span class="ico">◍</span> Partners</NavLink>
-
-            @if (UserContext.HasPermission(RGRE.ERP.Domain.Security.AppPermissions.Platform))
-            {
-                <div class="nav-group">Platform</div>
-                <NavLink class="nav-item" href="users"><span class="ico">◌</span> Users</NavLink>
-                <NavLink class="nav-item" href="roles"><span class="ico">☆</span> Roles</NavLink>
-                <NavLink class="nav-item" href="companies"><span class="ico">▣</span> Companies</NavLink>
-                <NavLink class="nav-item" href="branches"><span class="ico">▣</span> Branches</NavLink>
-                <NavLink class="nav-item" href="fiscal-years"><span class="ico">▦</span> Fiscal Years</NavLink>
-            }
-        </nav>
-
-        <div class="sidebar-footer">
             @if (UserContext.IsAuthenticated)
             {
-                <form method="post" action="/account/logout">
-                    <button type="submit" class="danger linklike">Sign out (@UserContext.UserName)</button>
-                </form>
+                <RadzenCard Variant="Variant.Outlined" Style="margin:0.6rem">
+                    <RadzenStack Gap="0.4rem">
+                        <RadzenText Text="@UserContext.DisplayName" TextStyle="TextStyle.Body1" Style="font-weight:600" />
+                        <form method="post" action="/account/switch-context">
+                            <AntiforgeryToken />
+                            <select name="CompanyId" style="width:100%; background:var(--rz-background); color:var(--rz-text); border:1px solid var(--rz-border); border-radius:8px; padding:0.35rem 0.4rem; font-size:0.85rem">
+                                <option value="">Company…</option>
+                                @foreach (var c in _companies)
+                                {
+                                    <option value="@c.Id" selected="@(c.Id == UserContext.CompanyId)">@c.Name</option>
+                                }
+                            </select>
+                            <select name="BranchId" style="width:100%; background:var(--rz-background); color:var(--rz-text); border:1px solid var(--rz-border); border-radius:8px; padding:0.35rem 0.4rem; font-size:0.85rem; margin-top:0.3rem">
+                                <option value="">Branch…</option>
+                                @foreach (var b in _branches.Where(b => !UserContext.CompanyId.HasValue || b.CompanyId == UserContext.CompanyId))
+                                {
+                                    <option value="@b.Id" selected="@(b.Id == UserContext.BranchId)">@b.Name</option>
+                                }
+                            </select>
+                            <select name="FiscalYearId" style="width:100%; background:var(--rz-background); color:var(--rz-text); border:1px solid var(--rz-border); border-radius:8px; padding:0.35rem 0.4rem; font-size:0.85rem; margin-top:0.3rem">
+                                <option value="">Fiscal year…</option>
+                                @foreach (var f in _fiscalYears.Where(f => !f.IsClosed))
+                                {
+                                    <option value="@f.Id" selected="@(f.Id == UserContext.FiscalYearId)">@f.Name</option>
+                                }
+                            </select>
+                            <RadzenButton ButtonType="ButtonType.Submit" Text="Apply" Style="margin-top:0.4rem; width:100%" />
+                        </form>
+                    </RadzenStack>
+                </RadzenCard>
             }
-            .NET 9 · Blazor Server
-        </div>
-    </aside>
 
-    <main class="content">
+            <RadzenPanelMenu Style="flex:1">
+                <RadzenPanelMenuItem Text="Dashboard" Icon="home" Click="@(args => Navigation.NavigateTo("/"))" />
+                <RadzenPanelMenuItem Text="Inventory" Icon="inventory_2">
+                    <RadzenPanelMenuItem Text="Goods" Icon="checklist" Click="@(args => Navigation.NavigateTo("goods"))" />
+                    <RadzenPanelMenuItem Text="Warehouses" Icon="warehouse" Click="@(args => Navigation.NavigateTo("warehouses"))" />
+                    <RadzenPanelMenuItem Text="Units" Icon="scale" Click="@(args => Navigation.NavigateTo("units"))" />
+                    <RadzenPanelMenuItem Text="Receipts" Icon="arrow_downward" Click="@(args => Navigation.NavigateTo("receipts"))" />
+                    <RadzenPanelMenuItem Text="Issues" Icon="arrow_upward" Click="@(args => Navigation.NavigateTo("issues"))" />
+                    <RadzenPanelMenuItem Text="Transfers" Icon="swap_horiz" Click="@(args => Navigation.NavigateTo("transfers"))" />
+                    <RadzenPanelMenuItem Text="Stock" Icon="bar_chart" Click="@(args => Navigation.NavigateTo("stock"))" />
+                </RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="Accounting" Icon="account_balance">
+                    <RadzenPanelMenuItem Text="Chart of Accounts" Icon="account_balance" Click="@(args => Navigation.NavigateTo("accounts"))" />
+                    <RadzenPanelMenuItem Text="Vouchers" Icon="description" Click="@(args => Navigation.NavigateTo("vouchers"))" />
+                </RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="Partners" Icon="people">
+                    <RadzenPanelMenuItem Text="Partners" Icon="person" Click="@(args => Navigation.NavigateTo("partners"))" />
+                </RadzenPanelMenuItem>
+                @if (UserContext.HasPermission(RGRE.ERP.Domain.Security.AppPermissions.Platform))
+                {
+                    <RadzenPanelMenuItem Text="Platform" Icon="settings">
+                        <RadzenPanelMenuItem Text="Users" Icon="person" Click="@(args => Navigation.NavigateTo("users"))" />
+                        <RadzenPanelMenuItem Text="Roles" Icon="verified_user" Click="@(args => Navigation.NavigateTo("roles"))" />
+                        <RadzenPanelMenuItem Text="Companies" Icon="business" Click="@(args => Navigation.NavigateTo("companies"))" />
+                        <RadzenPanelMenuItem Text="Branches" Icon="store" Click="@(args => Navigation.NavigateTo("branches"))" />
+                        <RadzenPanelMenuItem Text="Fiscal Years" Icon="calendar_today" Click="@(args => Navigation.NavigateTo("fiscal-years"))" />
+                    </RadzenPanelMenuItem>
+                }
+            </RadzenPanelMenu>
+
+            <div class="sidebar-footer" style="padding:0.7rem 1rem; border-top:1px solid var(--rz-border); color:var(--rz-text-dim); font-size:0.72rem">
+                @if (UserContext.IsAuthenticated)
+                {
+                    <form method="post" action="/account/logout" style="display:inline">
+                        <AntiforgeryToken />
+                        <button type="submit" class="danger linklike">Sign out (@UserContext.UserName)</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/login">Sign in</a>
+                }
+                <span style="margin-left:0.8rem">.NET 10 · Blazor Server</span>
+            </div>
+        </RadzenStack>
+    </RadzenSidebar>
+
+    <RadzenBody>
         @Body
-    </main>
-</div>
+    </RadzenBody>
+</RadzenLayout>
 
 @code {
     private IReadOnlyList<CompanyDto> _companies = [];

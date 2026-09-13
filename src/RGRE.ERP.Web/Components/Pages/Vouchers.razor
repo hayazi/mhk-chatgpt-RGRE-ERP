@@ -6,88 +6,80 @@
 <h1>Vouchers</h1>
 <h2>Journal entries (legacy: Voucher / Voucherms)</h2>
 
-<div class="card">
-    <h2>New voucher</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New voucher</h2>
+    <RadzenTemplateForm TItem="CreateVoucherDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Voucher">
                 <label>Number *</label>
-                <input @bind="_number" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Number" TValue="string" Style="width:100%" />
                 <label>Date (Jalali, e.g. @JalaliUi.TodayJalali)</label>
-                <input @bind="_dateJalali" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_dateJalali" TValue="string" Style="width:100%" />
                 <label>Description</label>
-                <input @bind="_description" />
-            </div>
-        </div>
-        <button type="submit">Create draft</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenTextBox @bind-Value="@_model.Description" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create draft" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_vouchers.Count == 0)
     {
         <p class="muted">No vouchers yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Date</th>
-                    <th class="num">Lines</th>
-                    <th class="num">Debit</th>
-                    <th class="num">Credit</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var v in _vouchers)
-                {
-                    var id = v.Id;
-                    var isDraft = v.Status == "Draft";
-                    <tr>
-                        <td>@v.Number</td>
-                        <td>@JalaliUi.Format(v.Date)</td>
-                        <td class="num">@v.LineCount</td>
-                        <td class="num">@v.TotalDebit.ToString("N2")</td>
-                        <td class="num">@v.TotalCredit.ToString("N2")</td>
-                        <td>
-                            <span class="badge @v.Status.ToLower()">@v.Status</span>
-                            @if (isDraft && v.TotalDebit != v.TotalCredit)
-                            {
-                                <span class="muted">(unbalanced)</span>
-                            }
-                        </td>
-                        <td>
-                            @if (isDraft)
-                            {
-                                <button @onclick="() => PostAsync(id)">Post</button>
-                            }
-                            else if (v.Status == "Posted")
-                            {
-                                <button class="danger" @onclick="() => CancelAsync(id)">Cancel</button>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <p class="muted">Vouchers are created draft via the API (<code>POST /api/vouchers</code> + lines); balance and post them here.</p>
+        <RadzenDataGrid Data="@_vouchers" TValue="VoucherDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="VoucherDto" Property="Number" Title="No." />
+                <RadzenDataGridColumn TItem="VoucherDto" Title="Date">
+                    <Template>
+                        @JalaliUi.Format(context.Date)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="VoucherDto" Title="Lines">
+                    <Template>
+                        @context.LineCount
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="VoucherDto" Property="TotalDebit" Title="Debit" FormatString="{0:N2}" />
+                <RadzenDataGridColumn TItem="VoucherDto" Property="TotalCredit" Title="Credit" FormatString="{0:N2}" />
+                <RadzenDataGridColumn TItem="VoucherDto" Title="Status">
+                    <Template>
+                        <RadzenBadge BadgeStyle="@(context.Status == "Draft" ? BadgeStyle.Warning : (context.Status == "Posted" ? BadgeStyle.Success : BadgeStyle.Danger))"
+                                     Text="@context.Status" />
+                        @if (context.Status == "Draft" && context.TotalDebit != context.TotalCredit)
+                        {
+                            <span class="muted">(unbalanced)</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="VoucherDto" Title="">
+                    <Template>
+                        @if (context.Status == "Draft")
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Post" Click="@(() => PostAsync(context.Id))" />
+                        }
+                        else if (context.Status == "Posted")
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Cancel" Click="@(() => CancelAsync(context.Id))" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+        <p class="muted" style="margin-top:0.8rem">
+            Vouchers are created draft via the API (<code>POST /api/vouchers</code> + lines); balance and post them here.
+        </p>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<VoucherDto> _vouchers = [];
-    private string _number = "";
+    private CreateVoucherDto _model = new();
     private string _dateJalali = JalaliUi.TodayJalali;
-    private string? _description;
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -106,14 +98,10 @@
             if (!JalaliUi.TryParse(_dateJalali, out var date))
                 throw new ArgumentException($"Invalid Jalali date '{_dateJalali}'. Use e.g. 1405/06/21.");
 
-            await VoucherService.CreateAsync(new CreateVoucherDto
-            {
-                Number = _number,
-                Date = date,
-                Description = _description,
-            });
-            _number = "";
-            _description = null;
+            _model.Date = date;
+
+            await VoucherService.CreateAsync(_model);
+            _model = new CreateVoucherDto();
             await LoadAsync();
         }
         catch (Exception ex)

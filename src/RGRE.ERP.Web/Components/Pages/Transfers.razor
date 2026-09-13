@@ -6,99 +6,100 @@
 <h1>Transfers</h1>
 <h2>Inter-warehouse transfers (legacy: EnteghalBeinAnbar)</h2>
 
-<div class="card">
-    <h2>New transfer</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New transfer</h2>
+    <RadzenTemplateForm TItem="CreateStockTransferDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Document">
                 <label>Document no. *</label>
-                <input @bind="_number" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.DocumentNumber" TValue="string" Style="width:100%" />
                 <label>Date (Jalali, e.g. @JalaliUi.TodayJalali)</label>
-                <input @bind="_dateJalali" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_dateJalali" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+            <RadzenFieldset Legend="Warehouses">
                 <label>From warehouse *</label>
-                <select @bind="_fromId">
-                    <option value="">—</option>
-                    @foreach (var w in Lookups.Warehouses)
-                    {
-                        <option value="@w.Id">@w.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="field">
+                <RadzenDropDown
+                    @bind-Value="@_model.FromWarehouseId"
+                    TValue="Guid"
+                    Data="@Lookups.Warehouses"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Placeholder="—"
+                    Style="width:100%" />
                 <label>To warehouse *</label>
-                <select @bind="_toId">
-                    <option value="">—</option>
-                    @foreach (var w in Lookups.Warehouses)
-                    {
-                        <option value="@w.Id">@w.Name</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <button type="submit">Create draft</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenDropDown
+                    @bind-Value="@_model.ToWarehouseId"
+                    TValue="Guid"
+                    Data="@Lookups.Warehouses"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Placeholder="—"
+                    Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create draft" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_transfers.Count == 0)
     {
         <p class="muted">No transfers yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Date</th>
-                    <th>From → To</th>
-                    <th class="num">Lines</th>
-                    <th class="num">Total qty</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var t in _transfers)
-                {
-                    var id = t.Id;
-                    var isDraft = t.Status == "Draft";
-                    <tr>
-                        <td>@t.DocumentNumber</td>
-                        <td>@JalaliUi.Format(t.DocumentDate)</td>
-                        <td>@Lookups.WarehouseName(t.FromWarehouseId) → @Lookups.WarehouseName(t.ToWarehouseId)</td>
-                        <td class="num">@t.Lines.Count</td>
-                        <td class="num">@t.Lines.Sum(l => l.Quantity)</td>
-                        <td><span class="badge @t.Status.ToLower()">@t.Status</span></td>
-                        <td>
-                            @if (isDraft)
-                            {
-                                <button @onclick="() => PostAsync(id)">Post</button>
-                                <button class="danger" @onclick="() => CancelDraftAsync(id)">Delete</button>
-                            }
-                            else
-                            {
-                                <span class="muted">—</span>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <RadzenDataGrid Data="@_transfers" TValue="StockTransferDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="StockTransferDto" Property="DocumentNumber" Title="No." />
+                <RadzenDataGridColumn TItem="StockTransferDto" Title="Date">
+                    <Template>
+                        @JalaliUi.Format(context.DocumentDate)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="StockTransferDto" Title="From → To">
+                    <Template>
+                        @Lookups.WarehouseName(context.FromWarehouseId) → @Lookups.WarehouseName(context.ToWarehouseId)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="StockTransferDto" Title="Lines">
+                    <Template>
+                        @context.Lines.Count
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="StockTransferDto" Title="Total qty">
+                    <Template>
+                        @context.Lines.Sum(l => l.Quantity)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="StockTransferDto" Title="Status">
+                    <Template>
+                        <RadzenBadge BadgeStyle="@(context.Status == "Draft" ? BadgeStyle.Warning : (context.Status == "Posted" ? BadgeStyle.Success : BadgeStyle.Danger))"
+                                     Text="@context.Status" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="StockTransferDto" Title="">
+                    <Template>
+                        @if (context.Status == "Draft")
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Post" Click="@(() => PostAsync(context.Id))" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Delete" Click="@(() => CancelDraftAsync(context.Id))" />
+                        }
+                        else
+                        {
+                            <span class="muted">—</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<StockTransferDto> _transfers = [];
-    private string _number = "";
+    private CreateStockTransferDto _model = new();
     private string _dateJalali = JalaliUi.TodayJalali;
-    private string _fromId = "";
-    private string _toId = "";
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -117,14 +118,10 @@
             if (!JalaliUi.TryParse(_dateJalali, out var date))
                 throw new ArgumentException($"Invalid Jalali date '{_dateJalali}'. Use e.g. 1405/06/21.");
 
-            await TransferService.CreateAsync(new CreateStockTransferDto
-            {
-                DocumentNumber = _number,
-                DocumentDate = date,
-                FromWarehouseId = Guid.Parse(_fromId),
-                ToWarehouseId = Guid.Parse(_toId),
-            });
-            _number = "";
+            _model.DocumentDate = date;
+
+            await TransferService.CreateAsync(_model);
+            _model = new CreateStockTransferDto();
             await LoadAsync();
         }
         catch (Exception ex)

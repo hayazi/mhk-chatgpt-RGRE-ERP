@@ -7,89 +7,102 @@
 <h1>Receipts</h1>
 <h2>Warehouse-in documents (legacy: Resid)</h2>
 
-<div class="card">
-    <h2>New receipt</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New receipt</h2>
+    <RadzenTemplateForm TItem="CreateReceiptDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Document">
                 <label>Document no. *</label>
-                <input @bind="_number" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.DocumentNumber" TValue="string" Style="width:100%" />
                 <label>Date (Jalali, e.g. @JalaliUi.TodayJalali)</label>
-                <input @bind="_dateJalali" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_dateJalali" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+            <RadzenFieldset Legend="Parties">
                 <label>Warehouse *</label>
-                <select @bind="_warehouseId">
-                    <option value="">—</option>
-                    @foreach (var w in Lookups.Warehouses)
-                    {
-                        <option value="@w.Id">@w.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="field">
+                <RadzenDropDown
+                    @bind-Value="@_model.WarehouseId"
+                    TValue="Guid"
+                    Data="@Lookups.Warehouses"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Placeholder="—"
+                    Style="width:100%" />
                 <label>Supplier</label>
-                <select @bind="_supplierId">
-                    <option value="">—</option>
-                    @foreach (var p in Lookups.Partners.Where(p => p.Kind.Contains("Supplier")))
-                    {
-                        <option value="@p.Id">@p.Name</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <button type="submit">Create draft</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenDropDown
+                    @bind-Value="@_model.SupplierId"
+                    TValue="Guid?"
+                    Data="@Lookups.Partners.Where(p => p.Kind.Contains("Supplier"))"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Placeholder="—"
+                    AllowClear="true"
+                    Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create draft" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_receipts.Count == 0)
     {
         <p class="muted">No receipts yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Date</th>
-                    <th>Warehouse</th>
-                    <th>Supplier</th>
-                    <th class="num">Lines</th>
-                    <th class="num">Amount</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var r in _receipts)
-                {
-                    <tr>
-                        <td><a href="receipts/@r.Id">@r.DocumentNumber</a></td>
-                        <td>@JalaliUi.Format(r.DocumentDate)</td>
-                        <td>@Lookups.WarehouseName(r.WarehouseId)</td>
-                        <td>@Lookups.PartnerName(r.SupplierId)</td>
-                        <td class="num">@r.Lines.Count</td>
-                        <td class="num">@r.Lines.Sum(l => l.Amount).ToString("N2")</td>
-                        <td><span class="badge @r.Status.ToLower()">@r.Status</span></td>
-                        <td><a href="receipts/@r.Id">Open →</a></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <RadzenDataGrid Data="@_receipts" TValue="ReceiptDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="No.">
+                    <Template>
+                        <a href="receipts/@context.Id">@context.DocumentNumber</a>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="Date">
+                    <Template>
+                        @JalaliUi.Format(context.DocumentDate)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="Warehouse">
+                    <Template>
+                        @Lookups.WarehouseName(context.WarehouseId)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="Supplier">
+                    <Template>
+                        @Lookups.PartnerName(context.SupplierId)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="Lines" FormatString="{0}">
+                    <Template>
+                        @context.Lines.Count
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="Amount">
+                    <Template>
+                        @context.Lines.Sum(l => l.Amount).ToString("N2")
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="Status">
+                    <Template>
+                        <RadzenBadge BadgeStyle="@(context.Status == "Draft" ? BadgeStyle.Warning : (context.Status == "Posted" ? BadgeStyle.Success : BadgeStyle.Danger))"
+                                     Text="@context.Status" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ReceiptDto" Title="">
+                    <Template>
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Open →" Click="@(() => Navigation.NavigateTo($"receipts/{context.Id}"))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<ReceiptDto> _receipts = [];
-    private string _number = "";
+    private CreateReceiptDto _model = new();
     private string _dateJalali = JalaliUi.TodayJalali;
-    private string _warehouseId = "";
-    private string _supplierId = "";
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -108,16 +121,9 @@
             if (!JalaliUi.TryParse(_dateJalali, out var date))
                 throw new ArgumentException($"Invalid Jalali date '{_dateJalali}'. Use e.g. 1405/06/21.");
 
-            var warehouseId = Guid.Parse(_warehouseId);
-            var supplierId = string.IsNullOrEmpty(_supplierId) ? (Guid?)null : Guid.Parse(_supplierId);
+            _model.DocumentDate = date;
 
-            var id = await ReceiptService.CreateAsync(new CreateReceiptDto
-            {
-                DocumentNumber = _number,
-                DocumentDate = date,
-                WarehouseId = warehouseId,
-                SupplierId = supplierId,
-            });
+            var id = await ReceiptService.CreateAsync(_model);
 
             Navigation.NavigateTo($"receipts/{id}");
         }

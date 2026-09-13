@@ -5,48 +5,34 @@
 <h1>Units</h1>
 <h2>Legacy: Unit / UnitRatio</h2>
 
-<div class="card">
-    <h2>Add unit</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">Add unit</h2>
+    <RadzenTemplateForm TItem="CreateUnitDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Unit">
                 <label>Name *</label>
-                <input @bind="_name" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
                 <label>Conversion factor</label>
-                <input type="number" step="0.0001" @bind="_factor" />
-            </div>
-        </div>
-        <button type="submit">Add</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenNumeric @bind-Value="@_model.ConversionFactor" TValue="decimal" Format="0.####" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Add" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
-    <table class="grid">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th class="num">Conversion factor</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var u in _units)
-            {
-                <tr>
-                    <td>@u.Name</td>
-                    <td class="num">@u.ConversionFactor</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+<RadzenCard>
+    <RadzenDataGrid Data="@_units" TValue="Unit" Style="width:100%">
+        <Columns>
+            <RadzenDataGridColumn TItem="Unit" Property="Name" Title="Name" />
+            <RadzenDataGridColumn TItem="Unit" Property="ConversionFactor" Title="Conversion factor" FormatString="{0:0.####}" />
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
 
 @code {
     private List<Unit> _units = [];
-    private string _name = "";
-    private decimal _factor = 1m;
+    private CreateUnitDto _model = new();
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -62,9 +48,8 @@
         _error = null;
         try
         {
-            await UnitService.CreateAsync(new CreateUnitDto { Name = _name, ConversionFactor = _factor });
-            _name = "";
-            _factor = 1m;
+            await UnitService.CreateAsync(_model);
+            _model = new CreateUnitDto();
             await Lookups.RefreshAsync();
             await LoadAsync();
         }

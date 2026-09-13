@@ -7,109 +7,96 @@
 <h1>Users</h1>
 <h2>Application users (legacy: Users + Permissions)</h2>
 
-<div class="card">
-    <h2>New user</h2>
-    <form @onsubmit="CreateAsync">
-        <div class="row">
-            <div class="field">
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">New user</h2>
+    <RadzenTemplateForm TItem="CreateUserDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Account">
                 <label>Username *</label>
-                <input @bind="_username" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.Username" TValue="string" Style="width:100%" />
                 <label>Display name *</label>
-                <input @bind="_displayName" />
-            </div>
-            <div class="field">
+                <RadzenTextBox @bind-Value="@_model.DisplayName" TValue="string" Style="width:100%" />
                 <label>Password *</label>
-                <input @bind="_password" type="password" />
-            </div>
-        </div>
-        <div class="field">
-            <label>Roles</label>
-            <select multiple @bind="_selectedRoleIds">
-                @foreach (var r in _roles)
-                {
-                    <option value="@r.Id">@r.Name</option>
-                }
-            </select>
-        </div>
-        <button type="submit">Create user</button>
-        <span class="error">@_error</span>
-    </form>
-</div>
+                <RadzenPassword @bind-Value="@_model.Password" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+            <RadzenFieldset Legend="Roles">
+                <RadzenDropDown
+                    @bind-Value="@_model.RoleIds"
+                    TValue="List<Guid>"
+                    Data="@_roles"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Multiple="true"
+                    Chips="true"
+                    Placeholder="Select roles"
+                    Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Create user" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
 
-<div class="card">
+<RadzenCard>
     @if (_users.Count == 0)
     {
         <p class="muted">No users yet.</p>
     }
     else
     {
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Display name</th>
-                    <th>Roles</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var u in _users)
-                {
-                    <tr>
-                        <td>@u.Username</td>
-                        <td>@u.DisplayName</td>
-                        <td>@string.Join(", ", _roles.Where(r => u.RoleIds.Contains(r.Id)).Select(r => r.Name))</td>
-                        <td>
-                            @if (!u.Enabled)
-                            {
-                                <span class="badge cancelled">Disabled</span>
-                            }
-                            else if (u.IsLockedOut)
-                            {
-                                <span class="badge draft">Locked</span>
-                            }
-                            else
-                            {
-                                <span class="badge posted">Active</span>
-                            }
-                        </td>
-                        <td>
-                            @if (u.Enabled)
-                            {
-                                <button class="danger" @onclick='() => SetEnabledAsync(u, false)'>Disable</button>
-                            }
-                            else
-                            {
-                                <button @onclick='() => SetEnabledAsync(u, true)'>Enable</button>
-                            }
-                            @if (u.IsLockedOut)
-                            {
-                                <button class="secondary" @onclick='() => UnlockAsync(u)'>Unlock</button>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <RadzenDataGrid Data="@_users" TValue="UserDto" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="UserDto" Property="Username" Title="Username" />
+                <RadzenDataGridColumn TItem="UserDto" Property="DisplayName" Title="Display name" />
+                <RadzenDataGridColumn TItem="UserDto" Title="Roles">
+                    <Template>
+                        @string.Join(", ", _roles.Where(r => context.RoleIds.Contains(r.Id)).Select(r => r.Name))
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="UserDto" Title="Status">
+                    <Template>
+                        @if (!context.Enabled)
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Disabled" />
+                        }
+                        else if (context.IsLockedOut)
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Warning" Text="Locked" />
+                        }
+                        else
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Active" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="UserDto" Title="">
+                    <Template>
+                        @if (context.Enabled)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Disable" Click="@(() => SetEnabledAsync(context, false))" />
+                        }
+                        else
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Enable" Click="@(() => SetEnabledAsync(context, true))" />
+                        }
+                        @if (context.IsLockedOut)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Unlock" Click="@(() => UnlockAsync(context))" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     }
-</div>
+</RadzenCard>
 
 @code {
     private List<UserDto> _users = [];
     private List<RoleDto> _roles = [];
-    private List<Guid> _selectedRoleIds = [];
-    private string _username = "";
-    private string _displayName = "";
-    private string _password = "";
+    private CreateUserDto _model = new();
     private string? _error;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadAsync();
-    }
+    protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync()
     {
@@ -122,16 +109,8 @@
         _error = null;
         try
         {
-            await UserService.CreateAsync(new CreateUserDto
-            {
-                Username = _username,
-                DisplayName = _displayName,
-                Password = _password,
-                RoleIds = _selectedRoleIds,
-            });
-
-            _username = _displayName = _password = "";
-            _selectedRoleIds = [];
+            await UserService.CreateAsync(_model);
+            _model = new CreateUserDto();
             await LoadAsync();
         }
         catch (Exception ex)
@@ -142,17 +121,29 @@
 
     private async Task SetEnabledAsync(UserDto user, bool enabled)
     {
-        if (enabled)
-            await UserService.SetEnabledAsync(user.Id, true);
-        else
-            await UserService.SetEnabledAsync(user.Id, false);
-
-        await LoadAsync();
+        _error = null;
+        try
+        {
+            await UserService.SetEnabledAsync(user.Id, enabled);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
     }
 
     private async Task UnlockAsync(UserDto user)
     {
-        await UserService.UnlockAsync(user.Id);
-        await LoadAsync();
+        _error = null;
+        try
+        {
+            await UserService.UnlockAsync(user.Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
     }
 }

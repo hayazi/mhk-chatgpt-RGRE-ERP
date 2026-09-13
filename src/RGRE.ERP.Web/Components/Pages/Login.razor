@@ -5,36 +5,38 @@
 @inject NavigationManager Navigation
 
 <div class="login-wrap">
-    <div class="login-card">
-        <div class="brand">
-            <span class="brand-mark">RG</span>
-            <span class="brand-name">RGRE-ERP</span>
-        </div>
+    <RadzenCard Style="width:380px; max-width:90vw">
+        <RadzenStack AlignItems="AlignItems.Center" Gap="0.4rem" Style="margin-bottom:1.2rem">
+            <RadzenBadge BadgeStyle="BadgeStyle.Primary" Text="RG" Style="font-size:1.4rem; width:44px; height:44px; border-radius:10px" />
+            <RadzenHeading Text="RGRE-ERP" HeadingStyle="HeadingStyle.H1" />
+        </RadzenStack>
 
-        <h1>Sign in</h1>
-        <p class="muted">Use your RGRE-ERP account.</p>
+        <h2 style="margin:0 0 0.2rem">Sign in</h2>
+        <p class="muted" style="margin:0 0 1rem">Use your RGRE-ERP account.</p>
 
         @if (!string.IsNullOrEmpty(_error))
         {
-            <div class="error">@_error</div>
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Text="@_error" Style="margin-bottom:1rem" />
         }
 
         <form method="post" action="/account/login">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@_returnUrl" />
-            <div class="field">
-                <label>Username</label>
-                <input name="Username" autocomplete="username" autofocus />
-            </div>
-            <div class="field">
-                <label>Password</label>
-                <input name="Password" type="password" autocomplete="current-password" />
-            </div>
-            <button type="submit">Sign in</button>
+            <RadzenStack Gap="0.8rem">
+                <RadzenFieldset Legend="Username">
+                    <input name="Username" autocomplete="username" autofocus Style="width:100%" />
+                </RadzenFieldset>
+                <RadzenFieldset Legend="Password">
+                    <input name="Password" type="password" autocomplete="current-password" Style="width:100%" />
+                </RadzenFieldset>
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Sign in" Style="width:100%" />
+            </RadzenStack>
         </form>
 
-        <p class="muted demo-hint">Demo accounts: <code>admin / admin123</code> · <code>warehouse / warehouse123</code></p>
-    </div>
+        <p class="muted" style="margin:1rem 0 0; font-size:0.78rem">
+            Demo accounts: <code>admin / admin123</code> · <code>warehouse / warehouse123</code>
+        </p>
+    </RadzenCard>
 </div>
 
 @code {
