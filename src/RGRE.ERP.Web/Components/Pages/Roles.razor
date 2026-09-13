@@ -1,0 +1,110 @@
+@page "/roles"
+@using RGRE.ERP.Application.Platform
+@using RGRE.ERP.Domain.Security
+@rendermode InteractiveServer
+@inject IRoleAdminService RoleService
+
+<h1>Roles</h1>
+<h2>Permission bundles (legacy: Permissions matrix)</h2>
+
+<div class="card">
+    <h2>New role</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Name *</label>
+                <input @bind="_name" />
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <input @bind="_description" />
+            </div>
+        </div>
+        <div class="field">
+            <label>Permissions</label>
+            <div class="perm-grid">
+                @foreach (var p in AppPermissions.All)
+                {
+                    <label class="perm">
+                        <input type="checkbox" checked="@_selectedPermissions.Contains(p)" @onchange='e => TogglePermission(p, e.Value is true)' />
+                        @p
+                    </label>
+                }
+            </div>
+        </div>
+        <button type="submit">Create role</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_roles.Count == 0)
+    {
+        <p class="muted">No roles yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Permissions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in _roles)
+                {
+                    <tr>
+                        <td>@r.Name</td>
+                        <td>@r.Description</td>
+                        <td>@string.Join(", ", r.Permissions)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<RoleDto> _roles = [];
+    private List<string> _selectedPermissions = [];
+    private string _name = "";
+    private string? _description;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => _roles = [.. await RoleService.ListAsync()];
+
+    private void TogglePermission(string permission, bool selected)
+    {
+        if (selected && !_selectedPermissions.Contains(permission))
+            _selectedPermissions.Add(permission);
+        else if (!selected)
+            _selectedPermissions.Remove(permission);
+    }
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await RoleService.CreateAsync(new CreateRoleDto
+            {
+                Name = _name,
+                Description = _description,
+                Permissions = _selectedPermissions,
+            });
+
+            _name = "";
+            _description = null;
+            _selectedPermissions = [];
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

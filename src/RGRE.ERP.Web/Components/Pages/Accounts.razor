@@ -1,0 +1,107 @@
+@page "/accounts"
+@inject UiLookups Lookups
+@inject ILedgerAccountAppService AccountService
+
+<h1>Chart of Accounts</h1>
+<h2>Legacy: GKol / GMoin / GTafzili</h2>
+
+<div class="card">
+    <h2>Add account</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Code *</label>
+                <input @bind="_code" />
+            </div>
+            <div class="field">
+                <label>Name *</label>
+                <input @bind="_name" />
+            </div>
+            <div class="field">
+                <label>Level</label>
+                <select @bind="_level">
+                    <option value="1">1 — Group (Kol)</option>
+                    <option value="2">2 — Controlling (Moin)</option>
+                    <option value="3">3 — Subsidiary (Tafzili)</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Parent</label>
+                <select @bind="_parentId">
+                    <option value="">—</option>
+                    @foreach (var a in Lookups.Accounts.Where(a => a.Level < 3))
+                    {
+                        <option value="@a.Id">@a.Code — @a.Name (L@a.Level)</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <button type="submit">Add</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    <table class="grid">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Parent</th>
+                <th>Posting</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in _accounts)
+            {
+                <tr>
+                    <td>@a.Code</td>
+                    <td>@a.Name</td>
+                    <td>L@a.Level</td>
+                    <td>@(a.ParentId is null ? "—" : Lookups.AccountName(a.ParentId.Value))</td>
+                    <td>@(a.AllowPosting ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<LedgerAccountDto> _accounts = [];
+    private string _code = "";
+    private string _name = "";
+    private int _level = 1;
+    private string _parentId = "";
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _accounts = [.. await AccountService.ListAsync()];
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await AccountService.CreateAsync(new CreateLedgerAccountDto
+            {
+                Code = _code,
+                Name = _name,
+                Level = _level,
+                ParentId = string.IsNullOrEmpty(_parentId) ? null : Guid.Parse(_parentId),
+            });
+            _code = _name = "";
+            await Lookups.RefreshAsync();
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,211 @@
+@page "/issues/{Id:guid}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject UiLookups Lookups
+@inject IIssueAppService IssueService
+@inject NavigationManager Navigation
+
+@if (_issue is null)
+{
+    <p class="muted">Loading…</p>
+}
+else
+{
+    <h1>Issue @_issue.DocumentNumber</h1>
+    <h2>
+        @Lookups.WarehouseName(_issue.WarehouseId) · @JalaliUi.Format(_issue.DocumentDate) ·
+        <span class="badge @_issue.Status.ToLower()">@_issue.Status</span>
+    </h2>
+
+    <p class="muted">@_issue.Description</p>
+
+    @if (IsDraft)
+    {
+        <div class="card">
+            <h2>Add line</h2>
+            <form @onsubmit="AddLineAsync">
+                <div class="row">
+                    <div class="field">
+                        <label>Goods *</label>
+                        <select @bind="_goodsId">
+                            <option value="">—</option>
+                            @foreach (var g in Lookups.Goods.Where(g => g.Enabled))
+                            {
+                                <option value="@g.Id">@g.Code — @g.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Unit</label>
+                        <select @bind="_unitId">
+                            <option value="">—</option>
+                            @foreach (var u in Lookups.Units)
+                            {
+                                <option value="@u.Id">@u.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Quantity *</label>
+                        <input type="number" step="0.0001" @bind="_qty" />
+                    </div>
+                    <div class="field">
+                        <label>Unit price</label>
+                        <input type="number" step="0.01" @bind="_price" />
+                    </div>
+                </div>
+                <button type="submit">Add line</button>
+                <span class="error">@_error</span>
+            </form>
+        </div>
+    }
+
+    <div class="card">
+        <h2>Lines</h2>
+        @if (_issue.Lines.Count == 0)
+        {
+            <p class="muted">No lines yet.</p>
+        }
+        else
+        {
+            <table class="grid">
+                <thead>
+                    <tr>
+                        <th>Goods</th>
+                        <th>Unit</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Unit price</th>
+                        <th class="num">Amount</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var line in _issue.Lines)
+                    {
+                        var lineId = line.Id;
+                        <tr>
+                            <td>@Lookups.GoodsName(line.GoodsId)</td>
+                            <td>@Lookups.UnitName(line.UnitId)</td>
+                            <td class="num">@line.Quantity</td>
+                            <td class="num">@line.UnitPrice.ToString("N2")</td>
+                            <td class="num">@line.Amount.ToString("N2")</td>
+                            <td>@line.Description</td>
+                            <td>
+                                @if (IsDraft)
+                                {
+                                    <button class="danger" @onclick="() => RemoveLineAsync(lineId)">✕</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="num"><strong>Total</strong></td>
+                        <td class="num"><strong>@_issue.Lines.Sum(l => l.Amount).ToString("N2")</strong></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+    </div>
+
+    <div>
+        @if (IsDraft)
+        {
+            <button @onclick="PostAsync" disabled="@(_issue.Lines.Count == 0)">Post to stock</button>
+        }
+        @if (_issue.Status == "Posted")
+        {
+            <button class="danger" @onclick="CancelAsync">Cancel issue</button>
+        }
+        <a class="btn secondary" href="issues">Back to list</a>
+        <span class="error">@_error</span>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private IssueDto? _issue;
+    private string _goodsId = "";
+    private string _unitId = "";
+    private decimal _qty;
+    private decimal _price;
+    private string? _error;
+
+    private bool IsDraft => _issue?.Status == "Draft";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _issue = await IssueService.GetAsync(Id);
+
+    private async Task AddLineAsync()
+    {
+        _error = null;
+        try
+        {
+            await IssueService.AddLineAsync(Id, new AddIssueLineDto
+            {
+                GoodsId = Guid.Parse(_goodsId),
+                UnitId = Guid.Parse(_unitId),
+                Quantity = _qty,
+                UnitPrice = _price,
+            });
+            _qty = 0;
+            _price = 0;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task RemoveLineAsync(Guid lineId)
+    {
+        _error = null;
+        try
+        {
+            await IssueService.RemoveLineAsync(Id, lineId);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task PostAsync()
+    {
+        _error = null;
+        try
+        {
+            await IssueService.PostAsync(Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        _error = null;
+        try
+        {
+            await IssueService.CancelAsync(Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

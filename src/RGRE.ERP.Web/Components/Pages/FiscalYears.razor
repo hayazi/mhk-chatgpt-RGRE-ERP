@@ -1,0 +1,170 @@
+@page "/fiscal-years"
+@using RGRE.ERP.Application.Platform
+@rendermode InteractiveServer
+@inject IOrganizationService OrganizationService
+@inject IFiscalYearService FiscalYearService
+
+<h1>Fiscal Years</h1>
+<h2>Accounting periods (legacy: FYear) — posting is blocked into closed years</h2>
+
+<div class="card">
+    <h2>New fiscal year</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Company *</label>
+                <select @bind="_companyId">
+                    <option value="">—</option>
+                    @foreach (var c in _companies)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>Name *</label>
+                <input @bind="_name" placeholder="سال مالی ۱۴۰۵" />
+            </div>
+            <div class="field">
+                <label>Start (Jalali, e.g. 1405/01/01) *</label>
+                <input @bind="_startJalali" />
+            </div>
+            <div class="field">
+                <label>End (Jalali, e.g. 1405/12/29) *</label>
+                <input @bind="_endJalali" />
+            </div>
+        </div>
+        <button type="submit">Create fiscal year</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_fiscalYears.Count == 0)
+    {
+        <p class="muted">No fiscal years yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var fy in _fiscalYears)
+                {
+                    <tr>
+                        <td>@fy.Name</td>
+                        <td>@CompanyName(fy.CompanyId)</td>
+                        <td>@fy.StartDateJalali</td>
+                        <td>@fy.EndDateJalali</td>
+                        <td>
+                            @if (fy.IsClosed)
+                            {
+                                <span class="badge cancelled">Closed</span>
+                            }
+                            else
+                            {
+                                <span class="badge posted">Open</span>
+                            }
+                        </td>
+                        <td>
+                            @if (fy.IsClosed)
+                            {
+                                <button class="secondary" @onclick='() => ReopenAsync(fy)'>Reopen</button>
+                            }
+                            else
+                            {
+                                <button class="danger" @onclick='() => CloseAsync(fy)'>Close</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<CompanyDto> _companies = [];
+    private List<FiscalYearDto> _fiscalYears = [];
+    private string _companyId = "";
+    private string _name = "";
+    private string _startJalali = "";
+    private string _endJalali = "";
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _companies = [.. await OrganizationService.ListCompaniesAsync()];
+        _fiscalYears = [.. await FiscalYearService.ListAsync()];
+    }
+
+    private string CompanyName(Guid companyId)
+        => _companies.FirstOrDefault(c => c.Id == companyId)?.Name ?? "(unknown company)";
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            if (!RGRE.ERP.Domain.Common.JalaliDate.TryParse(_startJalali, out var start))
+                throw new ArgumentException($"Invalid Jalali start date '{_startJalali}'.");
+
+            if (!RGRE.ERP.Domain.Common.JalaliDate.TryParse(_endJalali, out var end))
+                throw new ArgumentException($"Invalid Jalali end date '{_endJalali}'.");
+
+            await FiscalYearService.CreateAsync(new CreateFiscalYearDto
+            {
+                CompanyId = Guid.Parse(_companyId),
+                Name = _name,
+                StartDate = start,
+                EndDate = end,
+            });
+
+            _companyId = _name = _startJalali = _endJalali = "";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task CloseAsync(FiscalYearDto fy)
+    {
+        _error = null;
+        try
+        {
+            await FiscalYearService.CloseAsync(fy.Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task ReopenAsync(FiscalYearDto fy)
+    {
+        _error = null;
+        try
+        {
+            await FiscalYearService.ReopenAsync(fy.Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

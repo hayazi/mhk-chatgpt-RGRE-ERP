@@ -1,0 +1,158 @@
+@page "/users"
+@using RGRE.ERP.Application.Platform
+@rendermode InteractiveServer
+@inject IUserAdminService UserService
+@inject IRoleAdminService RoleService
+
+<h1>Users</h1>
+<h2>Application users (legacy: Users + Permissions)</h2>
+
+<div class="card">
+    <h2>New user</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Username *</label>
+                <input @bind="_username" />
+            </div>
+            <div class="field">
+                <label>Display name *</label>
+                <input @bind="_displayName" />
+            </div>
+            <div class="field">
+                <label>Password *</label>
+                <input @bind="_password" type="password" />
+            </div>
+        </div>
+        <div class="field">
+            <label>Roles</label>
+            <select multiple @bind="_selectedRoleIds">
+                @foreach (var r in _roles)
+                {
+                    <option value="@r.Id">@r.Name</option>
+                }
+            </select>
+        </div>
+        <button type="submit">Create user</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_users.Count == 0)
+    {
+        <p class="muted">No users yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Display name</th>
+                    <th>Roles</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in _users)
+                {
+                    <tr>
+                        <td>@u.Username</td>
+                        <td>@u.DisplayName</td>
+                        <td>@string.Join(", ", _roles.Where(r => u.RoleIds.Contains(r.Id)).Select(r => r.Name))</td>
+                        <td>
+                            @if (!u.Enabled)
+                            {
+                                <span class="badge cancelled">Disabled</span>
+                            }
+                            else if (u.IsLockedOut)
+                            {
+                                <span class="badge draft">Locked</span>
+                            }
+                            else
+                            {
+                                <span class="badge posted">Active</span>
+                            }
+                        </td>
+                        <td>
+                            @if (u.Enabled)
+                            {
+                                <button class="danger" @onclick='() => SetEnabledAsync(u, false)'>Disable</button>
+                            }
+                            else
+                            {
+                                <button @onclick='() => SetEnabledAsync(u, true)'>Enable</button>
+                            }
+                            @if (u.IsLockedOut)
+                            {
+                                <button class="secondary" @onclick='() => UnlockAsync(u)'>Unlock</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<UserDto> _users = [];
+    private List<RoleDto> _roles = [];
+    private List<Guid> _selectedRoleIds = [];
+    private string _username = "";
+    private string _displayName = "";
+    private string _password = "";
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _users = [.. await UserService.ListAsync()];
+        _roles = [.. await RoleService.ListAsync()];
+    }
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await UserService.CreateAsync(new CreateUserDto
+            {
+                Username = _username,
+                DisplayName = _displayName,
+                Password = _password,
+                RoleIds = _selectedRoleIds,
+            });
+
+            _username = _displayName = _password = "";
+            _selectedRoleIds = [];
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task SetEnabledAsync(UserDto user, bool enabled)
+    {
+        if (enabled)
+            await UserService.SetEnabledAsync(user.Id, true);
+        else
+            await UserService.SetEnabledAsync(user.Id, false);
+
+        await LoadAsync();
+    }
+
+    private async Task UnlockAsync(UserDto user)
+    {
+        await UserService.UnlockAsync(user.Id);
+        await LoadAsync();
+    }
+}

@@ -1,0 +1,55 @@
+@page "/login"
+@using RGRE.ERP.Application.Platform
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+@layout RGRE.ERP.Web.Components.Layout.EmptyLayout
+@inject NavigationManager Navigation
+
+<div class="login-wrap">
+    <div class="login-card">
+        <div class="brand">
+            <span class="brand-mark">RG</span>
+            <span class="brand-name">RGRE-ERP</span>
+        </div>
+
+        <h1>Sign in</h1>
+        <p class="muted">Use your RGRE-ERP account.</p>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="error">@_error</div>
+        }
+
+        <form method="post" action="/account/login">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="@_returnUrl" />
+            <div class="field">
+                <label>Username</label>
+                <input name="Username" autocomplete="username" autofocus />
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input name="Password" type="password" autocomplete="current-password" />
+            </div>
+            <button type="submit">Sign in</button>
+        </form>
+
+        <p class="muted demo-hint">Demo accounts: <code>admin / admin123</code> · <code>warehouse / warehouse123</code></p>
+    </div>
+</div>
+
+@code {
+    private string? _error;
+    private string? _returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        _error = query["error"];
+        _returnUrl = query["returnUrl"];
+
+        if (string.IsNullOrWhiteSpace(_returnUrl) || !_returnUrl.StartsWith('/'))
+            _returnUrl = "/";
+    }
+}

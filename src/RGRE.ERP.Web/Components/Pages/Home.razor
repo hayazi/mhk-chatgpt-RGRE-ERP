@@ -1,0 +1,135 @@
+@page "/"
+@inject UiLookups Lookups
+@inject IStockQueryService StockQuery
+@inject IVoucherAppService VoucherService
+@inject IReceiptAppService ReceiptService
+@inject IIssueAppService IssueService
+@inject IStockTransferAppService TransferService
+
+<h1>Dashboard</h1>
+<h2>System overview</h2>
+
+@if (!Lookups.Loaded)
+{
+    <p class="muted">Loading…</p>
+}
+else
+{
+    <div class="kpis">
+        <div class="kpi">
+            <div class="kpi-label">Goods</div>
+            <div class="kpi-value">@Lookups.Goods.Count</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Warehouses</div>
+            <div class="kpi-value">@Lookups.Warehouses.Count</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Partners</div>
+            <div class="kpi-value">@Lookups.Partners.Count</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Ledger accounts</div>
+            <div class="kpi-value">@Lookups.Accounts.Count</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Stock value by warehouse</h2>
+        @if (_stockByWarehouse.Count == 0)
+        {
+            <p class="muted">No stock movements yet.</p>
+        }
+        else
+        {
+            <table class="grid">
+                <thead>
+                    <tr>
+                        <th>Warehouse</th>
+                        <th class="num">Items</th>
+                        <th class="num">Quantity</th>
+                        <th class="num">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (warehouseId, items, qty, value) in _stockByWarehouse)
+                    {
+                        <tr>
+                            <td>@Lookups.WarehouseName(warehouseId)</td>
+                            <td class="num">@items</td>
+                            <td class="num">@qty.ToString("N2")</td>
+                            <td class="num">@value.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="card">
+        <h2>Recent documents</h2>
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Number</th>
+                    <th>Warehouse</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var doc in _recentDocs.Take(8))
+                {
+                    <tr>
+                        <td>@doc.Type</td>
+                        <td>@doc.Number</td>
+                        <td>@doc.Warehouse</td>
+                        <td><span class="badge @doc.Status.ToLower()">@doc.Status</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<(Guid WarehouseId, int Items, decimal Qty, decimal Value)> _stockByWarehouse = [];
+    private List<(string Type, string Number, string Warehouse, string Status)> _recentDocs = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+
+        var receipts = await ReceiptService.ListAsync();
+        var issues = await IssueService.ListAsync();
+        var transfers = await TransferService.ListAsync();
+        var vouchers = await VoucherService.ListAsync();
+
+        _recentDocs =
+        [
+            .. receipts.Select(r => ("Receipt", r.DocumentNumber, Lookups.WarehouseName(r.WarehouseId), r.Status)),
+            .. issues.Select(i => ("Issue", i.DocumentNumber, Lookups.WarehouseName(i.WarehouseId), i.Status)),
+            .. transfers.Select(t => ("Transfer", t.DocumentNumber,
+                $"{Lookups.WarehouseName(t.FromWarehouseId)} → {Lookups.WarehouseName(t.ToWarehouseId)}", t.Status)),
+            .. vouchers.Select(v => ("Voucher", v.Number, "—", v.Status)),
+        ];
+
+        var balancesByWarehouse = new Dictionary<Guid, List<StockBalanceDto>>();
+        foreach (var warehouse in Lookups.Warehouses)
+        {
+            var balances = await StockQuery.GetByWarehouseAsync(warehouse.Id);
+            if (balances.Count > 0)
+            {
+                balancesByWarehouse[warehouse.Id] = [.. balances];
+            }
+        }
+
+        _stockByWarehouse = balancesByWarehouse
+            .Select(kv => (
+                kv.Key,
+                kv.Value.Count,
+                kv.Value.Sum(b => b.Quantity),
+                kv.Value.Sum(b => b.TotalValue)))
+            .ToList();
+    }
+}

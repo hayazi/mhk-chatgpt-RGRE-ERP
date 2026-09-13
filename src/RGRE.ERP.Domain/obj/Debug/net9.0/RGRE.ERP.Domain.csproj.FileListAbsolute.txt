@@ -1,0 +1,12 @@
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\bin\Debug\net9.0\RGRE.ERP.Domain.deps.json
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\bin\Debug\net9.0\RGRE.ERP.Domain.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\bin\Debug\net9.0\RGRE.ERP.Domain.pdb
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.Domain.GeneratedMSBuildEditorConfig.editorconfig
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.Domain.AssemblyInfoInputs.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.Domain.AssemblyInfo.cs
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.Domain.csproj.CoreCompileInputs.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.Domain.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\refint\RGRE.ERP.Domain.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.Domain.pdb
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\ref\RGRE.ERP.Domain.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net9.0\RGRE.ERP.680AC9A5.Up2Date

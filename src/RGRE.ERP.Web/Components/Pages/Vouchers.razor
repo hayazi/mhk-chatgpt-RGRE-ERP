@@ -1,0 +1,152 @@
+@page "/vouchers"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject UiLookups Lookups
+@inject IVoucherAppService VoucherService
+
+<h1>Vouchers</h1>
+<h2>Journal entries (legacy: Voucher / Voucherms)</h2>
+
+<div class="card">
+    <h2>New voucher</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Number *</label>
+                <input @bind="_number" />
+            </div>
+            <div class="field">
+                <label>Date (Jalali, e.g. @JalaliUi.TodayJalali)</label>
+                <input @bind="_dateJalali" />
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <input @bind="_description" />
+            </div>
+        </div>
+        <button type="submit">Create draft</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_vouchers.Count == 0)
+    {
+        <p class="muted">No vouchers yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Date</th>
+                    <th class="num">Lines</th>
+                    <th class="num">Debit</th>
+                    <th class="num">Credit</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in _vouchers)
+                {
+                    var id = v.Id;
+                    var isDraft = v.Status == "Draft";
+                    <tr>
+                        <td>@v.Number</td>
+                        <td>@JalaliUi.Format(v.Date)</td>
+                        <td class="num">@v.LineCount</td>
+                        <td class="num">@v.TotalDebit.ToString("N2")</td>
+                        <td class="num">@v.TotalCredit.ToString("N2")</td>
+                        <td>
+                            <span class="badge @v.Status.ToLower()">@v.Status</span>
+                            @if (isDraft && v.TotalDebit != v.TotalCredit)
+                            {
+                                <span class="muted">(unbalanced)</span>
+                            }
+                        </td>
+                        <td>
+                            @if (isDraft)
+                            {
+                                <button @onclick="() => PostAsync(id)">Post</button>
+                            }
+                            else if (v.Status == "Posted")
+                            {
+                                <button class="danger" @onclick="() => CancelAsync(id)">Cancel</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <p class="muted">Vouchers are created draft via the API (<code>POST /api/vouchers</code> + lines); balance and post them here.</p>
+    }
+</div>
+
+@code {
+    private List<VoucherDto> _vouchers = [];
+    private string _number = "";
+    private string _dateJalali = JalaliUi.TodayJalali;
+    private string? _description;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _vouchers = [.. await VoucherService.ListAsync()];
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            if (!JalaliUi.TryParse(_dateJalali, out var date))
+                throw new ArgumentException($"Invalid Jalali date '{_dateJalali}'. Use e.g. 1405/06/21.");
+
+            await VoucherService.CreateAsync(new CreateVoucherDto
+            {
+                Number = _number,
+                Date = date,
+                Description = _description,
+            });
+            _number = "";
+            _description = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task PostAsync(Guid id)
+    {
+        _error = null;
+        try
+        {
+            await VoucherService.PostAsync(id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task CancelAsync(Guid id)
+    {
+        _error = null;
+        try
+        {
+            await VoucherService.CancelAsync(id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,110 @@
+@inherits LayoutComponentBase
+@using RGRE.ERP.Application.Platform
+@inject CurrentUserContext UserContext
+@inject IOrganizationService OrganizationService
+@inject IFiscalYearService FiscalYearService
+@inject NavigationManager Navigation
+
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-mark">RG</span>
+            <span class="brand-name">RGRE-ERP</span>
+        </div>
+
+        @if (UserContext.IsAuthenticated)
+        {
+            <div class="context-bar">
+                <div class="context-user" title="@UserContext.UserName">@(UserContext.DisplayName ?? UserContext.UserName)</div>
+                <form method="post" action="/account/switch-context">
+                    <select name="CompanyId">
+                        <option value="">Company…</option>
+                        @foreach (var c in _companies)
+                        {
+                            <option value="@c.Id" selected="@(c.Id == UserContext.CompanyId)">@c.Name</option>
+                        }
+                    </select>
+                    <select name="BranchId">
+                        <option value="">Branch…</option>
+                        @foreach (var b in _branches.Where(b => !UserContext.CompanyId.HasValue || b.CompanyId == UserContext.CompanyId))
+                        {
+                            <option value="@b.Id" selected="@(b.Id == UserContext.BranchId)">@b.Name</option>
+                        }
+                    </select>
+                    <select name="FiscalYearId">
+                        <option value="">Fiscal year…</option>
+                        @foreach (var f in _fiscalYears.Where(f => !f.IsClosed))
+                        {
+                            <option value="@f.Id" selected="@(f.Id == UserContext.FiscalYearId)">@f.Name</option>
+                        }
+                    </select>
+                    <button type="submit" class="secondary context-apply">Apply</button>
+                </form>
+            </div>
+        }
+
+        <nav>
+            <NavLink class="nav-item" href="/" Match="NavLinkMatch.All">
+                <span class="ico">⌂</span> Dashboard
+            </NavLink>
+
+            <div class="nav-group">Inventory</div>
+            <NavLink class="nav-item" href="goods"><span class="ico">▦</span> Goods</NavLink>
+            <NavLink class="nav-item" href="warehouses"><span class="ico">⌸</span> Warehouses</NavLink>
+            <NavLink class="nav-item" href="units"><span class="ico">≡</span> Units</NavLink>
+            <NavLink class="nav-item" href="receipts"><span class="ico">↘</span> Receipts</NavLink>
+            <NavLink class="nav-item" href="issues"><span class="ico">↗</span> Issues</NavLink>
+            <NavLink class="nav-item" href="transfers"><span class="ico">⇄</span> Transfers</NavLink>
+            <NavLink class="nav-item" href="stock"><span class="ico">≣</span> Stock</NavLink>
+
+            <div class="nav-group">Accounting</div>
+            <NavLink class="nav-item" href="accounts"><span class="ico">⌗</span> Chart of Accounts</NavLink>
+            <NavLink class="nav-item" href="vouchers"><span class="ico">▤</span> Vouchers</NavLink>
+
+            <div class="nav-group">Partners</div>
+            <NavLink class="nav-item" href="partners"><span class="ico">◍</span> Partners</NavLink>
+
+            @if (UserContext.HasPermission(RGRE.ERP.Domain.Security.AppPermissions.Platform))
+            {
+                <div class="nav-group">Platform</div>
+                <NavLink class="nav-item" href="users"><span class="ico">◌</span> Users</NavLink>
+                <NavLink class="nav-item" href="roles"><span class="ico">☆</span> Roles</NavLink>
+                <NavLink class="nav-item" href="companies"><span class="ico">▣</span> Companies</NavLink>
+                <NavLink class="nav-item" href="branches"><span class="ico">▣</span> Branches</NavLink>
+                <NavLink class="nav-item" href="fiscal-years"><span class="ico">▦</span> Fiscal Years</NavLink>
+            }
+        </nav>
+
+        <div class="sidebar-footer">
+            @if (UserContext.IsAuthenticated)
+            {
+                <form method="post" action="/account/logout">
+                    <button type="submit" class="danger linklike">Sign out (@UserContext.UserName)</button>
+                </form>
+            }
+            .NET 9 · Blazor Server
+        </div>
+    </aside>
+
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+@code {
+    private IReadOnlyList<CompanyDto> _companies = [];
+    private IReadOnlyList<BranchDto> _branches = [];
+    private IReadOnlyList<FiscalYearDto> _fiscalYears = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UserContext.InitializeAsync();
+
+        if (UserContext.IsAuthenticated)
+        {
+            _companies = await OrganizationService.ListCompaniesAsync();
+            _branches = await OrganizationService.ListBranchesAsync();
+            _fiscalYears = await FiscalYearService.ListAsync();
+        }
+    }
+}

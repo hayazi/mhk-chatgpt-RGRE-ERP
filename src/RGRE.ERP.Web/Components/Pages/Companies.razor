@@ -1,0 +1,104 @@
+@page "/companies"
+@using RGRE.ERP.Application.Platform
+@rendermode InteractiveServer
+@inject IOrganizationService OrganizationService
+
+<h1>Companies</h1>
+<h2>Legal companies (legacy: Corporations)</h2>
+
+<div class="card">
+    <h2>New company</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Code *</label>
+                <input @bind="_code" />
+            </div>
+            <div class="field">
+                <label>Name *</label>
+                <input @bind="_name" />
+            </div>
+            <div class="field">
+                <label>Economic code</label>
+                <input @bind="_economicCode" />
+            </div>
+            <div class="field">
+                <label>National id</label>
+                <input @bind="_nationalId" />
+            </div>
+        </div>
+        <button type="submit">Create company</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_companies.Count == 0)
+    {
+        <p class="muted">No companies yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Economic code</th>
+                    <th>National id</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in _companies)
+                {
+                    <tr>
+                        <td>@c.Code</td>
+                        <td>@c.Name</td>
+                        <td>@c.EconomicCode</td>
+                        <td>@c.NationalId</td>
+                        <td>
+                            <span class="badge @(c.Enabled ? "posted" : "cancelled")">@(c.Enabled ? "Active" : "Disabled")</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<CompanyDto> _companies = [];
+    private string _code = "";
+    private string _name = "";
+    private string? _economicCode;
+    private string? _nationalId;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => _companies = [.. await OrganizationService.ListCompaniesAsync()];
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await OrganizationService.CreateCompanyAsync(new CreateCompanyDto
+            {
+                Code = _code,
+                Name = _name,
+                EconomicCode = _economicCode,
+                NationalId = _nationalId,
+            });
+
+            _code = _name = "";
+            _economicCode = _nationalId = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

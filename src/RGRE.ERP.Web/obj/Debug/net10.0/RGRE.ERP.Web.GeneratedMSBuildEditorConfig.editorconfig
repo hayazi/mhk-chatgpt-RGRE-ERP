@@ -1,0 +1,128 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFramework = net10.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.EntryPointFilePath = 
+build_property.RootNamespace = RGRE.ERP.Web
+build_property.RootNamespace = RGRE.ERP.Web
+build_property.ProjectDir = F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 10.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/App.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBcHAucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Layout/EmptyLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcRW1wdHlMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbkxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Accounts.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Branches.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xCcmFuY2hlcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Companies.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wYW5pZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/FiscalYears.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xGaXNjYWxZZWFycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Goods.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xHb29kcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/IssueDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xJc3N1ZURldGFpbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Issues.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xJc3N1ZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Partners.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQYXJ0bmVycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/ReceiptDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZWNlaXB0RGV0YWlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Receipts.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZWNlaXB0cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Roles.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSb2xlcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Stock.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdG9jay5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Transfers.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFuc2ZlcnMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Units.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xVbml0cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Users.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xVc2Vycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Vouchers.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xWb3VjaGVycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Pages/Warehouses.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xXYXJlaG91c2VzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSb3V0ZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/mhk-chatgpt/RGRE-ERP/src/RGRE.ERP.Web/Components/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xfSW1wb3J0cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 

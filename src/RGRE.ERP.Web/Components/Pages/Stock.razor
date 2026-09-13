@@ -1,0 +1,106 @@
+@page "/stock"
+@inject UiLookups Lookups
+@inject IStockQueryService StockQuery
+
+<h1>Stock</h1>
+<h2>Balances from the stock ledger (legacy: Analyze)</h2>
+
+<RadzenCard>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.8rem" AlignItems="AlignItems.End" Wrap="FlexWrap.Wrap">
+        <RadzenFieldset Legend="Warehouse">
+            <RadzenDropDown
+                @bind-Value="@_warehouseId"
+                TValue="Guid?"
+                Data="@Lookups.Warehouses"
+                TextProperty="Name"
+                ValueProperty="Id"
+                Placeholder="— select —"
+                AllowClear="true"
+                Change="@LoadAsync" />
+        </RadzenFieldset>
+    </RadzenStack>
+</RadzenCard>
+
+@if (_warehouseId.HasValue)
+{
+    <RadzenCard>
+        <h2 style="margin:0 0 0.6rem">Balances — @Lookups.WarehouseName(_warehouseId.Value)</h2>
+        @if (_balances.Count == 0)
+        {
+            <p class="muted">No stock in this warehouse.</p>
+        }
+        else
+        {
+            <RadzenDataGrid Data="@_balances" TValue="StockBalanceDto" Style="width:100%">
+                <Columns>
+                    <RadzenDataGridColumn TItem="StockBalanceDto" Property="GoodsId" Title="Goods">
+                        <Template>
+                            @Lookups.GoodsName(context.GoodsId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="StockBalanceDto" Property="Quantity" Title="Quantity" FormatString="{0:N2}" />
+                    <RadzenDataGridColumn TItem="StockBalanceDto" Property="AverageCost" Title="Avg cost" FormatString="{0:N2}" />
+                    <RadzenDataGridColumn TItem="StockBalanceDto" Property="TotalValue" Title="Value" FormatString="{0:N2}">
+                        <FooterTemplate>
+                            <strong>@_balances.Sum(b => b.TotalValue).ToString("N2")</strong>
+                        </FooterTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="StockBalanceDto" Title="">
+                        <Template>
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="moves" Click="@(() => ShowMovesAsync(context.GoodsId))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        }
+    </RadzenCard>
+}
+
+@if (_moves.Count > 0)
+{
+    <RadzenCard>
+        <h2 style="margin:0 0 0.6rem">Moves — @Lookups.GoodsName(_movesGoodsId)</h2>
+        <RadzenDataGrid Data="@_moves" TValue="StockMove" Style="width:100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="StockMove" Property="MoveDate" Title="Date" FormatString="{0:yyyy-MM-dd}" />
+                <RadzenDataGridColumn TItem="StockMove" Property="Direction" Title="Dir">
+                    <Template>
+                        @(context.Direction == StockMoveDirection.In ? "In ↘" : "Out ↗")
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="StockMove" Property="Quantity" Title="Qty" />
+                <RadzenDataGridColumn TItem="StockMove" Property="UnitPrice" Title="Unit price" FormatString="{0:N2}" />
+                <RadzenDataGridColumn TItem="StockMove" Property="Description" Title="Description" />
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenCard>
+}
+
+@code {
+    private Guid? _warehouseId;
+    private List<StockBalanceDto> _balances = [];
+    private List<StockMove> _moves = [];
+    private Guid _movesGoodsId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _moves = [];
+        _balances = [];
+
+        if (_warehouseId.HasValue)
+        {
+            _balances = [.. await StockQuery.GetByWarehouseAsync(_warehouseId.Value)];
+        }
+    }
+
+    private async Task ShowMovesAsync(Guid goodsId)
+    {
+        _movesGoodsId = goodsId;
+        _moves = [.. await StockQuery.GetMovesAsync(goodsId)];
+    }
+}

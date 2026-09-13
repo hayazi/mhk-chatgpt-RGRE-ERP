@@ -1,0 +1,129 @@
+@page "/receipts"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject UiLookups Lookups
+@inject IReceiptAppService ReceiptService
+@inject NavigationManager Navigation
+
+<h1>Receipts</h1>
+<h2>Warehouse-in documents (legacy: Resid)</h2>
+
+<div class="card">
+    <h2>New receipt</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Document no. *</label>
+                <input @bind="_number" />
+            </div>
+            <div class="field">
+                <label>Date (Jalali, e.g. @JalaliUi.TodayJalali)</label>
+                <input @bind="_dateJalali" />
+            </div>
+            <div class="field">
+                <label>Warehouse *</label>
+                <select @bind="_warehouseId">
+                    <option value="">—</option>
+                    @foreach (var w in Lookups.Warehouses)
+                    {
+                        <option value="@w.Id">@w.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>Supplier</label>
+                <select @bind="_supplierId">
+                    <option value="">—</option>
+                    @foreach (var p in Lookups.Partners.Where(p => p.Kind.Contains("Supplier")))
+                    {
+                        <option value="@p.Id">@p.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <button type="submit">Create draft</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_receipts.Count == 0)
+    {
+        <p class="muted">No receipts yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Date</th>
+                    <th>Warehouse</th>
+                    <th>Supplier</th>
+                    <th class="num">Lines</th>
+                    <th class="num">Amount</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in _receipts)
+                {
+                    <tr>
+                        <td><a href="receipts/@r.Id">@r.DocumentNumber</a></td>
+                        <td>@JalaliUi.Format(r.DocumentDate)</td>
+                        <td>@Lookups.WarehouseName(r.WarehouseId)</td>
+                        <td>@Lookups.PartnerName(r.SupplierId)</td>
+                        <td class="num">@r.Lines.Count</td>
+                        <td class="num">@r.Lines.Sum(l => l.Amount).ToString("N2")</td>
+                        <td><span class="badge @r.Status.ToLower()">@r.Status</span></td>
+                        <td><a href="receipts/@r.Id">Open →</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<ReceiptDto> _receipts = [];
+    private string _number = "";
+    private string _dateJalali = JalaliUi.TodayJalali;
+    private string _warehouseId = "";
+    private string _supplierId = "";
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _receipts = [.. await ReceiptService.ListAsync()];
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            if (!JalaliUi.TryParse(_dateJalali, out var date))
+                throw new ArgumentException($"Invalid Jalali date '{_dateJalali}'. Use e.g. 1405/06/21.");
+
+            var warehouseId = Guid.Parse(_warehouseId);
+            var supplierId = string.IsNullOrEmpty(_supplierId) ? (Guid?)null : Guid.Parse(_supplierId);
+
+            var id = await ReceiptService.CreateAsync(new CreateReceiptDto
+            {
+                DocumentNumber = _number,
+                DocumentDate = date,
+                WarehouseId = warehouseId,
+                SupplierId = supplierId,
+            });
+
+            Navigation.NavigateTo($"receipts/{id}");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

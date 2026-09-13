@@ -1,0 +1,10 @@
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\EmbeddedAttribute.cs
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\ValidatableTypeAttribute.cs
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.csproj.AssemblyReference.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\rpswa.dswa.cache.json
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.GeneratedMSBuildEditorConfig.editorconfig
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.AssemblyInfoInputs.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.AssemblyInfo.cs
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.csproj.CoreCompileInputs.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.MvcApplicationPartsAssemblyInfo.cs
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Web\obj\Debug\net10.0\RGRE.ERP.Web.MvcApplicationPartsAssemblyInfo.cache

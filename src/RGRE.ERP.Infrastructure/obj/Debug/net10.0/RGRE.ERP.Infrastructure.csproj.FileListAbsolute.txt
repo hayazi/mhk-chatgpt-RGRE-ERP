@@ -1,0 +1,17 @@
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Infrastructure.deps.json
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Infrastructure.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Infrastructure.pdb
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Application.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Domain.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Application.pdb
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\bin\Debug\net10.0\RGRE.ERP.Domain.pdb
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.csproj.AssemblyReference.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.AssemblyInfoInputs.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.AssemblyInfo.cs
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.csproj.CoreCompileInputs.cache
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.2FB89755.Up2Date
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\refint\RGRE.ERP.Infrastructure.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\RGRE.ERP.Infrastructure.pdb
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Infrastructure\obj\Debug\net10.0\ref\RGRE.ERP.Infrastructure.dll

@@ -1,0 +1,137 @@
+@page "/goods"
+@inject UiLookups Lookups
+@inject IGoodsAppService GoodsService
+
+<h1>Goods</h1>
+<h2>Master data (legacy: Goods)</h2>
+
+<RadzenCard>
+    <h2 style="margin:0 0 0.6rem">Register goods</h2>
+    <RadzenTemplateForm TItem="CreateGoodsDto" Data="@_model" Submit="@CreateAsync">
+        <RadzenStack Gap="0.8rem" Wrap="FlexWrap.Wrap">
+            <RadzenFieldset Legend="Identification">
+                <label>Code *</label>
+                <RadzenTextBox @bind-Value="@_model.Code" TValue="string" Style="width:100%" />
+                <label>Name *</label>
+                <RadzenTextBox @bind-Value="@_model.Name" TValue="string" Style="width:100%" />
+                <label>Name (2nd language)</label>
+                <RadzenTextBox @bind-Value="@_model.Name2" TValue="string" Style="width:100%" />
+            </RadzenFieldset>
+
+            <RadzenFieldset Legend="Pricing &amp; type">
+                <label>Base unit</label>
+                <RadzenDropDown
+                    @bind-Value="@_model.BaseUnitId"
+                    TValue="Guid"
+                    Data="@Lookups.Units"
+                    TextProperty="Name"
+                    ValueProperty="Id"
+                    Placeholder="—"
+                    Style="width:100%" />
+
+                <label>Type</label>
+                <RadzenDropDown
+                    @bind-Value="@_model.GoodsType"
+                    TValue="string"
+                    Data="@(new[] { "Goods", "RawMaterial", "Service" })"
+                    Style="width:100%" />
+
+                <label>Standard cost</label>
+                <RadzenNumeric @bind-Value="@_model.StandardCost" TValue="decimal?" Format="N2" Style="width:100%" />
+
+                <label>Sale price</label>
+                <RadzenNumeric @bind-Value="@_model.SalePrice" TValue="decimal?" Format="N2" Style="width:100%" />
+            </RadzenFieldset>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Add goods" Style="margin-top:0.8rem" />
+        <span class="error" style="margin-left:0.8rem">@_error</span>
+    </RadzenTemplateForm>
+</RadzenCard>
+
+<RadzenCard>
+    <RadzenDataGrid Data="@_goods" TValue="GoodsDto" Style="width:100%">
+        <Columns>
+            <RadzenDataGridColumn TItem="GoodsDto" Property="Code" Title="Code" />
+            <RadzenDataGridColumn TItem="GoodsDto" Property="Name" Title="Name">
+                <Template>
+                    @context.Name @if (!string.IsNullOrEmpty(context.Name2))
+                    {
+                        <span class="muted">(@context.Name2)</span>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="GoodsDto" Property="GoodsType" Title="Type" />
+            <RadzenDataGridColumn TItem="GoodsDto" Title="Unit">
+                <Template>
+                    @Lookups.UnitName(context.BaseUnitId)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="GoodsDto" Property="BarCode" Title="BarCode" />
+            <RadzenDataGridColumn TItem="GoodsDto" Property="StandardCost" Title="Std cost" FormatString="{0:N2}" />
+            <RadzenDataGridColumn TItem="GoodsDto" Property="SalePrice" Title="Sale price" FormatString="{0:N2}" />
+            <RadzenDataGridColumn TItem="GoodsDto" Title="Status">
+                <Template>
+                    @if (context.Enabled)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Active" />
+                    }
+                    else
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Disabled" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="GoodsDto" Title="">
+                <Template>
+                    <RadzenButton ButtonStyle="ButtonStyle.Light"
+                                  Text="@(context.Enabled ? "Disable" : "Enable")"
+                                  Click="@(() => ToggleAsync(context.Id, context.Enabled))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
+
+@code {
+    private List<GoodsDto> _goods = [];
+    private CreateGoodsDto _model = new();
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _goods = [.. await GoodsService.ListAsync()];
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await GoodsService.CreateAsync(_model);
+            _model = new CreateGoodsDto();
+            await Lookups.RefreshAsync();
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task ToggleAsync(Guid id, bool enabled)
+    {
+        if (enabled)
+        {
+            await GoodsService.DisableAsync(id);
+        }
+        else
+        {
+            await GoodsService.EnableAsync(id);
+        }
+
+        await LoadAsync();
+    }
+}

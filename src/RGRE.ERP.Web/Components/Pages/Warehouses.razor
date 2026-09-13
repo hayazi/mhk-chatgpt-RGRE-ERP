@@ -1,0 +1,96 @@
+@page "/warehouses"
+@inject UiLookups Lookups
+@inject IWarehouseAppService WarehouseService
+
+<h1>Warehouses</h1>
+<h2>Legacy: Anbar</h2>
+
+<div class="card">
+    <h2>Add warehouse</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Code *</label>
+                <input @bind="_code" />
+            </div>
+            <div class="field">
+                <label>Name *</label>
+                <input @bind="_name" />
+            </div>
+            <div class="field">
+                <label>Telephone</label>
+                <input @bind="_telephone" />
+            </div>
+            <div class="field">
+                <label>Address</label>
+                <input @bind="_address" />
+            </div>
+        </div>
+        <button type="submit">Add</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    <table class="grid">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Telephone</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var w in _warehouses)
+            {
+                <tr>
+                    <td>@w.Code</td>
+                    <td>@w.Name</td>
+                    <td>@w.Telephone</td>
+                    <td>@w.Address</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Warehouse> _warehouses = [];
+    private string _code = "";
+    private string _name = "";
+    private string? _telephone;
+    private string? _address;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Lookups.LoadAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _warehouses = [.. await WarehouseService.ListAsync()];
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await WarehouseService.CreateAsync(new CreateWarehouseDto
+            {
+                Code = _code,
+                Name = _name,
+                Telephone = _telephone,
+                Address = _address,
+            });
+            _code = _name = "";
+            _telephone = _address = null;
+            await Lookups.RefreshAsync();
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

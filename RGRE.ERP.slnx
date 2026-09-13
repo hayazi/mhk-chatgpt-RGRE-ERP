@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RGRE.ERP.Application/RGRE.ERP.Application.csproj" />
+    <Project Path="src/RGRE.ERP.Domain/RGRE.ERP.Domain.csproj" />
+    <Project Path="src/RGRE.ERP.Infrastructure/RGRE.ERP.Infrastructure.csproj" />
+    <Project Path="src/RGRE.ERP.Web/RGRE.ERP.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RGRE.ERP.Application.Tests/RGRE.ERP.Application.Tests.csproj" />
+  </Folder>
+</Solution>

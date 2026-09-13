@@ -1,0 +1,118 @@
+@page "/branches"
+@using RGRE.ERP.Application.Platform
+@rendermode InteractiveServer
+@inject IOrganizationService OrganizationService
+
+<h1>Branches</h1>
+<h2>Company branches (legacy: Branchs)</h2>
+
+<div class="card">
+    <h2>New branch</h2>
+    <form @onsubmit="CreateAsync">
+        <div class="row">
+            <div class="field">
+                <label>Company *</label>
+                <select @bind="_companyId">
+                    <option value="">—</option>
+                    @foreach (var c in _companies)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>Code *</label>
+                <input @bind="_code" />
+            </div>
+            <div class="field">
+                <label>Name *</label>
+                <input @bind="_name" />
+            </div>
+            <div class="field">
+                <label>Telephone</label>
+                <input @bind="_telephone" />
+            </div>
+        </div>
+        <button type="submit">Create branch</button>
+        <span class="error">@_error</span>
+    </form>
+</div>
+
+<div class="card">
+    @if (_branches.Count == 0)
+    {
+        <p class="muted">No branches yet.</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Telephone</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in _branches)
+                {
+                    <tr>
+                        <td>@CompanyName(b.CompanyId)</td>
+                        <td>@b.Code</td>
+                        <td>@b.Name</td>
+                        <td>@b.Telephone</td>
+                        <td>
+                            <span class="badge @(b.Enabled ? "posted" : "cancelled")">@(b.Enabled ? "Active" : "Disabled")</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<CompanyDto> _companies = [];
+    private List<BranchDto> _branches = [];
+    private string _companyId = "";
+    private string _code = "";
+    private string _name = "";
+    private string? _telephone;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _companies = [.. await OrganizationService.ListCompaniesAsync()];
+        _branches = [.. await OrganizationService.ListBranchesAsync()];
+    }
+
+    private string CompanyName(Guid companyId)
+        => _companies.FirstOrDefault(c => c.Id == companyId)?.Name ?? "(unknown company)";
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        try
+        {
+            await OrganizationService.CreateBranchAsync(new CreateBranchDto
+            {
+                CompanyId = Guid.Parse(_companyId),
+                Code = _code,
+                Name = _name,
+                Telephone = _telephone,
+            });
+
+            _companyId = _code = _name = "";
+            _telephone = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}
