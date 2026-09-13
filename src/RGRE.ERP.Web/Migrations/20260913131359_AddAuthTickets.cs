@@ -15,9 +15,9 @@ namespace RGRE.ERP.Web.Migrations
                 name: "AuthTickets",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TicketJson = table.Column<string>(type: "TEXT", maxLength: 16000, nullable: false),
-                    ExpiresUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TicketJson = table.Column<string>(type: "nvarchar(max)", maxLength: 16000, nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
