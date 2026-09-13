@@ -98,3 +98,4 @@ F:\mhk-chatgpt\RGRE-ERP\tests\RGRE.ERP.Application.Tests\obj\Debug\net10.0\refin
 F:\mhk-chatgpt\RGRE-ERP\tests\RGRE.ERP.Application.Tests\obj\Debug\net10.0\RGRE.ERP.Application.Tests.pdb
 F:\mhk-chatgpt\RGRE-ERP\tests\RGRE.ERP.Application.Tests\obj\Debug\net10.0\RGRE.ERP.Application.Tests.genruntimeconfig.cache
 F:\mhk-chatgpt\RGRE-ERP\tests\RGRE.ERP.Application.Tests\obj\Debug\net10.0\ref\RGRE.ERP.Application.Tests.dll
+F:\mhk-chatgpt\RGRE-ERP\tests\RGRE.ERP.Application.Tests\obj\Debug\net10.0\RGRE.ERP.Application.Tests.sourcelink.json

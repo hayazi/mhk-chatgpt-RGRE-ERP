@@ -9,3 +9,4 @@ F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net10.0\RGRE.ERP.Domain.dl
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net10.0\refint\RGRE.ERP.Domain.dll
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net10.0\RGRE.ERP.Domain.pdb
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net10.0\ref\RGRE.ERP.Domain.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Domain\obj\Debug\net10.0\RGRE.ERP.Domain.sourcelink.json

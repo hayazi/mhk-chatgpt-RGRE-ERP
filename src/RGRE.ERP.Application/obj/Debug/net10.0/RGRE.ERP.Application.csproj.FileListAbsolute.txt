@@ -13,3 +13,4 @@ F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Application\obj\Debug\net10.0\RGRE.ERP.Appl
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Application\obj\Debug\net10.0\refint\RGRE.ERP.Application.dll
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Application\obj\Debug\net10.0\RGRE.ERP.Application.pdb
 F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Application\obj\Debug\net10.0\ref\RGRE.ERP.Application.dll
+F:\mhk-chatgpt\RGRE-ERP\src\RGRE.ERP.Application\obj\Debug\net10.0\RGRE.ERP.Application.sourcelink.json
