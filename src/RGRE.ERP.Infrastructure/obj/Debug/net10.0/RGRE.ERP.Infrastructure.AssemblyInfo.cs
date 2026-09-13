@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RGRE.ERP.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74e06327425855c0306b04ce08dc5fdaad125631")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c580e61b41e179dc80c376adbc9fde356b191177")]
 [assembly: System.Reflection.AssemblyProductAttribute("RGRE.ERP.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RGRE.ERP.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

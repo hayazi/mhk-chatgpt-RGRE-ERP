@@ -50,15 +50,15 @@ builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<Curr
 
 builder.Services.AddScoped<UiLookups>();
 
-// Persisted auth-ticket store (separate context, same SQLite database).
+// Persisted auth-ticket store (separate context, same SQL Server database).
 builder.Services.AddDbContext<WebAuthDbContext>(options =>
-    options.UseSqlite(
+    options.UseSqlServer(
         builder.Configuration.GetConnectionString("ErpDatabase")
-        ?? "Data Source=rgre-erp.db"));
+        ?? "Data Source=localhost;Initial Catalog=RGREERP;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True"));
 
 var app = builder.Build();
 
-// Auto-migrate + seed on startup (SQLite demo database).
+// Auto-migrate + seed on startup (SQL Server demo database).
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ErpDbContext>();

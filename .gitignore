@@ -1,5 +1,64 @@
-/.vs
-/bin/
-/obj/
-*.dll
-*.pdb
+## Ignore built project output
+bin/
+obj/
+
+## User-specific files
+*.user
+*.suo
+*.cache
+.vs/
+
+## Secrets and environment-specific config
+*.secrets.json
+appsettings.Development.json
+appsettings.*.local.json
+
+## Node modules
+node_modules/
+
+## Generated static assets
+wwwroot/libs/
+wwwroot/dist/
+wwwroot/build/
+
+## NuGet packages
+*.nupkg
+*.snupkg
+.packages/
+
+## Test results
+TestResults/
+testResults/
+coverage/
+*.coverage
+*.trx
+*.html
+
+## Logs
+*.log
+logs/
+
+## .NET
+.dotnet/
+.publishsettings
+
+## OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+## Backup files
+*.bak
+*.swp
+*~
+
+## Database files (large)
+/Data2008R2/
+/Date Lib/
+/ERP/
+/RGREMoadianWebAppV0.0.27/
+*.mdf
+*.ldf
+*.ndf
+/src/RGRE.ERP.Application/bin/
+

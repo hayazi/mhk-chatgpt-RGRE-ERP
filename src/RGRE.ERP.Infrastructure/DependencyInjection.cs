@@ -33,12 +33,12 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString =
+var connectionString =
             configuration.GetConnectionString("ErpDatabase")
-            ?? "Data Source=rgre-erp.db";
+            ?? "Data Source=localhost;Initial Catalog=RGREERP;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True";
 
         services.AddDbContext<ErpDbContext>((sp, options) =>
-            options.UseSqlite(connectionString)
+            options.UseSqlServer(connectionString)
                 .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
 
         // Cross-cutting infrastructure
