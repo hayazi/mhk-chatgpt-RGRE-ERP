@@ -39,7 +39,8 @@ var connectionString =
 
         services.AddDbContext<ErpDbContext>((sp, options) =>
             options.UseSqlServer(connectionString)
-                .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
+                .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>())
+                .EnableThreadSafetyChecks(false));
 
         // Cross-cutting infrastructure
         services.AddScoped<AuditSaveChangesInterceptor>();

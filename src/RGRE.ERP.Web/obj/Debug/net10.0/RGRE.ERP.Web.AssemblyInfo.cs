@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RGRE.ERP.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3c496122613b9de262ad202484ab53dc5d8d6b34")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3aa6c8699f38c3c013b4b2cd4559aced8f14eb37")]
 [assembly: System.Reflection.AssemblyProductAttribute("RGRE.ERP.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RGRE.ERP.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -48,7 +48,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenti
 builder.Services.AddScoped<CurrentUserContext>();
 builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<CurrentUserContext>());
 
-builder.Services.AddScoped<UiLookups>();
+builder.Services.AddTransient<UiLookups>();
 
 // Persisted auth-ticket store (separate context, same SQL Server database).
 builder.Services.AddDbContext<WebAuthDbContext>(options =>
